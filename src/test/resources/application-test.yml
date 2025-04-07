@@ -1,0 +1,26 @@
+db:
+  schema-name: intershop
+spring:
+  jackson:
+    time-zone: UTC
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 10
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: ${db.schema-name}
+        format_sql: true
+        query.fail_on_pagination_over_collection_fetch: true
+        jdbc.time_zone: UTC
+        show_sql: false
+    open-in-view: false
+  liquibase:
+    liquibase-schema: ${db.schema-name}
+    default-schema: ${db.schema-name}
+    change-log: classpath:db/changelog/db.changelog-master.xml
+  application:
+    name: intershop
