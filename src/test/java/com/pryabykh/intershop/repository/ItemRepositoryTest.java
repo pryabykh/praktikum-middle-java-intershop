@@ -1,6 +1,5 @@
 package com.pryabykh.intershop.repository;
 
-import com.pryabykh.intershop.ItemRepository;
 import com.pryabykh.intershop.entity.Item;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

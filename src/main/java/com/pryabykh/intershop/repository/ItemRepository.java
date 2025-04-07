@@ -1,4 +1,4 @@
-package com.pryabykh.intershop;
+package com.pryabykh.intershop.repository;
 
 import com.pryabykh.intershop.entity.Item;
 import org.springframework.data.domain.Page;
