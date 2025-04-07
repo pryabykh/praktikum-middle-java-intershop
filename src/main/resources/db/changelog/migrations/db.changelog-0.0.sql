@@ -1,4 +1,4 @@
 --liquibase formatted sql
 
---changeset rzn-adapter-gisgmp:1
+--changeset intershop:1
 SELECT 1;
