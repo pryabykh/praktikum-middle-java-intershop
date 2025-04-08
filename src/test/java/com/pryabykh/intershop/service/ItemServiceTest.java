@@ -2,6 +2,7 @@ package com.pryabykh.intershop.service;
 
 import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.enums.SortType;
+import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -29,9 +31,15 @@ public class ItemServiceTest {
     @MockitoBean
     private ItemRepository itemRepository;
 
+    @MockitoBean
+    private CartItemRepository cartItemRepository;
+
+    @MockitoBean
+    private UserService userService;
+
     @BeforeEach
     void setUp() {
-        Mockito.reset(itemRepository);
+        Mockito.reset(itemRepository, userService, cartItemRepository);
     }
 
     @Test
@@ -47,10 +55,13 @@ public class ItemServiceTest {
 
         when(itemRepository.findAll(any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(item), pageable, 1));
+        when(userService.fetchDefaultUserId()).thenReturn(1L);
+        when(cartItemRepository.findByItemIdInAndUserId(any(), any())).thenReturn(new ArrayList<>());
 
         itemService.findAll(null, SortType.NO, 10, 0);
 
         verify(itemRepository, times(1)).findAll(eq(pageable));
+        verify(cartItemRepository, times(1)).findByItemIdInAndUserId(eq(List.of(1L)), eq(1L));
     }
 
     @Test

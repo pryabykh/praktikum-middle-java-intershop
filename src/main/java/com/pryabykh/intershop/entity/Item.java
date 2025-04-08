@@ -1,11 +1,19 @@
 package com.pryabykh.intershop.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "items")
@@ -26,6 +34,17 @@ public class Item {
 
     @Column(name = "image_id", nullable = false)
     private Long imageId;
+
+    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    public Item() {
+    }
+
+    public Item(Long id) {
+        this.id = id;
+    }
 
     public Long getId() {
         return id;
@@ -65,5 +84,13 @@ public class Item {
 
     public void setImageId(Long imageId) {
         this.imageId = imageId;
+    }
+
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
     }
 }
