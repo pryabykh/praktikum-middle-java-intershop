@@ -43,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
                             item.getTitle(),
                             String.valueOf(item.getPrice() / 100),
                             item.getDescription(),
-                            "/images/" + item.getImageId(),
+                            "images/" + item.getImageId(),
                             0
                     );
                 });
