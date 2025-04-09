@@ -1,6 +1,6 @@
 package com.pryabykh.intershop.service;
 
-import com.pryabykh.intershop.dto.ItemListDto;
+import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.dto.ItemsPage;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.enums.SortType;
@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
+    private static final String IMAGE_CONTEXT_PATH = "images/";
     public ItemServiceImpl(ItemRepository itemRepository,
                            CartItemRepository cartItemRepository,
                            UserService userService) {
@@ -34,29 +36,44 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public ItemsPage findAll(String name, SortType sort,  int pageSize, int pageNumber) {
         PageRequest pageRequest = createPageRequest(sort, pageSize, pageNumber);
-        Page<ItemListDto> items = Optional.ofNullable(name)
+        Page<ItemDto> items = Optional.ofNullable(name)
                 .map(n -> itemRepository.findAllByNameLike(n, pageRequest))
                 .orElse(itemRepository.findAll(pageRequest))
                 .map(item -> {
-                    return new ItemListDto(
+                    return new ItemDto(
                             item.getId(),
                             item.getTitle(),
                             String.valueOf(item.getPrice() / 100),
                             item.getDescription(),
-                            "images/" + item.getImageId(),
-                            0
+                            IMAGE_CONTEXT_PATH + item.getImageId()
                     );
                 });
-        assignCountToItems(items);
+        assignCountToItems(items.getContent());
         return new ItemsPage(items);
     }
 
-    private void assignCountToItems(Page<ItemListDto> items) {
+    @Override
+    @Transactional(readOnly = true)
+    public ItemDto findById(Long id) {
+        return itemRepository.findById(id).map(item -> {
+            ItemDto itemDto = new ItemDto(
+                    item.getId(),
+                    item.getTitle(),
+                    String.valueOf(item.getPrice() / 100),
+                    item.getDescription(),
+                    IMAGE_CONTEXT_PATH + item.getImageId()
+            );
+            assignCountToItems(List.of(itemDto));
+            return itemDto;
+        }).orElseThrow();
+    }
+
+    private void assignCountToItems(List<ItemDto> items) {
         Map<Long, Integer> itemCountByItemId = cartItemRepository.findByItemIdInAndUserId(
-                items.stream().map(ItemListDto::getId).distinct().collect(Collectors.toList()),
+                items.stream().map(ItemDto::getId).distinct().collect(Collectors.toList()),
                 userService.fetchDefaultUserId()
         ).stream().collect(Collectors.toMap(cartItem -> cartItem.getItem().getId(), CartItem::getCount));
-        for (ItemListDto item : items) {
+        for (ItemDto item : items) {
             Integer count = itemCountByItemId.get(item.getId());
             if (count != null) {
                 item.setCount(count);

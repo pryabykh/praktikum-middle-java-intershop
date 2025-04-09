@@ -17,9 +17,16 @@ public class CartItemController {
     }
 
     @PostMapping("/main/items/{itemId}")
-    public String mainItems(@PathVariable("itemId") Long itemId,
-                            @RequestParam("action") String action) {
+    public String modifyCartAndRedirectToMain(@PathVariable("itemId") Long itemId,
+                                              @RequestParam("action") String action) {
         cartItemService.modifyCart(itemId, action);
         return "redirect:/main/items";
+    }
+
+    @PostMapping("/items/{itemId}")
+    public String modifyCartAndRedirectToItem(@PathVariable("itemId") Long itemId,
+                                              @RequestParam("action") String action) {
+        cartItemService.modifyCart(itemId, action);
+        return "redirect:/items/" + itemId;
     }
 }

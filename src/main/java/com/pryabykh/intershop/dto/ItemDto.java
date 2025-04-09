@@ -1,6 +1,6 @@
 package com.pryabykh.intershop.dto;
 
-public class ItemListDto {
+public class ItemDto {
 
     private Long id;
 
@@ -14,13 +14,12 @@ public class ItemListDto {
 
     private int count;
 
-    public ItemListDto(Long id, String title, String price, String description, String imgPath, int count) {
+    public ItemDto(Long id, String title, String price, String description, String imgPath) {
         this.id = id;
         this.title = title;
         this.price = price;
         this.description = description;
         this.imgPath = imgPath;
-        this.count = count;
     }
 
     public Long getId() {

@@ -8,22 +8,22 @@ import java.util.List;
 public class ItemsPage {
 
     private final Paging paging;
-    private final List<List<ItemListDto>> items;
+    private final List<List<ItemDto>> items;
 
-    public ItemsPage(Page<ItemListDto> page) {
-        List<List<ItemListDto>> items = new ArrayList<>();
+    public ItemsPage(Page<ItemDto> page) {
+        List<List<ItemDto>> items = new ArrayList<>();
         this.paging = new Paging(page);
         int rowCount = 1;
-        for (ItemListDto itemListDto : page) {
+        for (ItemDto itemDto : page) {
             if (rowCount > 3) {
                 rowCount = 1;
             }
             if (rowCount == 1) {
-                List<ItemListDto> row = new ArrayList<>();
-                row.add(itemListDto);
+                List<ItemDto> row = new ArrayList<>();
+                row.add(itemDto);
                 items.add(row);
             } else {
-                items.get(items.size() - 1).add(itemListDto);
+                items.get(items.size() - 1).add(itemDto);
             }
             rowCount++;
         }
@@ -34,19 +34,19 @@ public class ItemsPage {
         return paging;
     }
 
-    public List<List<ItemListDto>> getItems() {
+    public List<List<ItemDto>> getItems() {
         return items;
     }
 
     public static class Paging {
 
-        private final Page<ItemListDto> page;
+        private final Page<ItemDto> page;
 
         private final int pageSize;
 
         private final int pageNumber;
 
-        public Paging(Page<ItemListDto> page) {
+        public Paging(Page<ItemDto> page) {
             this.page = page;
             this.pageSize = page.getPageable().getPageSize();
             this.pageNumber = page.getPageable().getPageNumber();
@@ -60,7 +60,7 @@ public class ItemsPage {
             return page.hasNext();
         }
 
-        public Page<ItemListDto> getPage() {
+        public Page<ItemDto> getPage() {
             return page;
         }
 

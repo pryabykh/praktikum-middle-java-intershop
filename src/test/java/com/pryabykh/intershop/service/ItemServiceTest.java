@@ -1,9 +1,11 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.enums.SortType;
 import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,7 +18,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -119,5 +124,27 @@ public class ItemServiceTest {
         itemService.findAll("name1", SortType.ALPHA, 10, 0);
 
         verify(itemRepository, times(1)).findAllByNameLike(eq("name1"), eq(pageable));
+    }
+
+    @Test
+    void findById_whenEntityExists_shouldReturnIt() {
+        Item item = new Item();
+        item.setId(1L);
+        item.setImageId(11L);
+        item.setPrice(111L);
+        item.setTitle("title");
+        item.setDescription("description");
+
+        when(itemRepository.findById(eq(1L)))
+                .thenReturn(Optional.of(item));
+
+        ItemDto itemDto = itemService.findById(1L);
+
+        assertNotNull(itemDto);
+        assertEquals(1L, itemDto.getId());
+        assertEquals("images/11", itemDto.getImgPath());
+        assertEquals(String.valueOf(111L / 100L), itemDto.getPrice());
+        assertEquals("title", itemDto.getTitle());
+        assertEquals("description", itemDto.getDescription());
     }
 }
