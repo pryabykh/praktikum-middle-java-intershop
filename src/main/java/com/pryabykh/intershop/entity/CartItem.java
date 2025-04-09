@@ -8,10 +8,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "carts")
+@NamedEntityGraph(
+        name = "cart-item-with-item-itself-entity-graph",
+        attributeNodes = {
+                @NamedAttributeNode("item")
+        }
+)
 public class CartItem {
 
     @Id

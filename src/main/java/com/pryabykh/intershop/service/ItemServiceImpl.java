@@ -23,7 +23,6 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
-    private static final String IMAGE_CONTEXT_PATH = "images/";
     public ItemServiceImpl(ItemRepository itemRepository,
                            CartItemRepository cartItemRepository,
                            UserService userService) {
@@ -45,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
                             item.getTitle(),
                             String.valueOf(item.getPrice() / 100),
                             item.getDescription(),
-                            IMAGE_CONTEXT_PATH + item.getImageId()
+                            String.valueOf(item.getImageId())
                     );
                 });
         assignCountToItems(items.getContent());
@@ -61,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
                     item.getTitle(),
                     String.valueOf(item.getPrice() / 100),
                     item.getDescription(),
-                    IMAGE_CONTEXT_PATH + item.getImageId()
+                    String.valueOf(item.getImageId())
             );
             assignCountToItems(List.of(itemDto));
             return itemDto;

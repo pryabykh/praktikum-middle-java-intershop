@@ -1,6 +1,7 @@
 package com.pryabykh.intershop.service;
 
 import com.pryabykh.intershop.constant.CartActions;
+import com.pryabykh.intershop.dto.CartDto;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.enums.SortType;
@@ -23,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -86,5 +90,39 @@ public class CartItemServiceTest {
 
         cartItemService.modifyCart(1L, CartActions.DELETE);
         verify(cartItemRepository, times(1)).delete(cartItem);
+    }
+
+    @Test
+    void fetchCartItems_whenCartIsNotEmpty_shouldReturnItems() {
+        when(userService.fetchDefaultUserId()).thenReturn(1L);
+
+        Item item = new Item();
+        item.setId(1L);
+        item.setImageId(11L);
+        item.setPrice(100L);
+        item.setTitle("title");
+        item.setDescription("description");
+
+        CartItem cartItem = new CartItem();
+        cartItem.setItem(item);
+        cartItem.setCount(2);
+        cartItem.setUserId(1L);
+        cartItem.setId(1L);
+
+        when(cartItemRepository.findByUserId(eq(1L))).thenReturn(List.of(cartItem));
+
+        CartDto cartDto = cartItemService.fetchCartItems();
+
+        assertNotNull(cartDto);
+        assertFalse(cartDto.isEmpty());
+        assertFalse(cartDto.getItems().isEmpty());
+        assertEquals(1, cartDto.getItems().size());
+        assertEquals(2L, cartDto.getTotal());
+        assertEquals(1L, cartDto.getItems().get(0).getId());
+        assertEquals("11", cartDto.getItems().get(0).getImgPath());
+        assertEquals("2", cartDto.getItems().get(0).getPrice());
+        assertEquals("title", cartDto.getItems().get(0).getTitle());
+        assertEquals("description", cartDto.getItems().get(0).getDescription());
+        assertEquals(2, cartDto.getItems().get(0).getCount());
     }
 }

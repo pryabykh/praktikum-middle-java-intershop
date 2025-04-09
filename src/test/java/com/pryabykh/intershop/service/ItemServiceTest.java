@@ -5,7 +5,6 @@ import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.enums.SortType;
 import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -142,7 +141,7 @@ public class ItemServiceTest {
 
         assertNotNull(itemDto);
         assertEquals(1L, itemDto.getId());
-        assertEquals("images/11", itemDto.getImgPath());
+        assertEquals("11", itemDto.getImgPath());
         assertEquals(String.valueOf(111L / 100L), itemDto.getPrice());
         assertEquals("title", itemDto.getTitle());
         assertEquals("description", itemDto.getDescription());

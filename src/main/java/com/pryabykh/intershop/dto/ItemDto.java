@@ -22,6 +22,15 @@ public class ItemDto {
         this.imgPath = imgPath;
     }
 
+    public ItemDto(Long id, String title, String price, String description, String imgPath, int count) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.description = description;
+        this.imgPath = imgPath;
+        this.count = count;
+    }
+
     public Long getId() {
         return id;
     }
