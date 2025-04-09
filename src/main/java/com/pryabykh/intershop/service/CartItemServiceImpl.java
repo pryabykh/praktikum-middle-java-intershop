@@ -55,7 +55,7 @@ public class CartItemServiceImpl implements CartItemService {
     public CartDto fetchCartItems() {
         Long currentUserId = userService.fetchDefaultUserId();
         AtomicLong total = new AtomicLong();
-        List<ItemDto> items = cartItemRepository.findByUserId(currentUserId).stream().map(cartItem -> {
+        List<ItemDto> items = cartItemRepository.findByUserIdOrderByIdDesc(currentUserId).stream().map(cartItem -> {
             long itemPrice = cartItem.getItem().getPrice() * cartItem.getCount() / 100;
             total.addAndGet(itemPrice);
             return new ItemDto(

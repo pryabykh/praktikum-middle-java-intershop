@@ -1,6 +1,10 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.dto.OrderDto;
+
 public interface OrderService {
 
-    void createOrder();
+    Long createOrder();
+
+    OrderDto findById(Long orderId);
 }

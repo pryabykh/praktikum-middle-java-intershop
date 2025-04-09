@@ -4,9 +4,7 @@ import com.pryabykh.intershop.constant.CartActions;
 import com.pryabykh.intershop.dto.CartDto;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Item;
-import com.pryabykh.intershop.enums.SortType;
 import com.pryabykh.intershop.repository.CartItemRepository;
-import com.pryabykh.intershop.repository.ItemRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +13,8 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,7 +103,7 @@ public class CartItemServiceTest {
         cartItem.setUserId(1L);
         cartItem.setId(1L);
 
-        when(cartItemRepository.findByUserId(eq(1L))).thenReturn(List.of(cartItem));
+        when(cartItemRepository.findByUserIdOrderByIdDesc(eq(1L))).thenReturn(List.of(cartItem));
 
         CartDto cartDto = cartItemService.fetchCartItems();
 

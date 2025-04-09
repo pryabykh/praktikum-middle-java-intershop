@@ -1,10 +1,14 @@
 package com.pryabykh.intershop.controller;
 
+import com.pryabykh.intershop.dto.OrderDto;
 import com.pryabykh.intershop.service.OrderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/")
@@ -16,9 +20,18 @@ public class OrderController {
     }
 
     @PostMapping("/buy")
-    public String createOrder(Model model) {
-        orderService.createOrder();
-        model.addAttribute("newOrder", true);
+    public String createOrder() {
+        Long orderId = orderService.createOrder();
+        return "redirect:/orders/" + orderId + "?newOrder=true";
+    }
+
+    @GetMapping("/orders/{id}")
+    public String fetchOrder(@PathVariable("id") Long id,
+                             @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
+                             Model model) {
+        OrderDto order = orderService.findById(id);
+        model.addAttribute("newOrder", newOrder);
+        model.addAttribute("order", order);
         return "order";
     }
 }

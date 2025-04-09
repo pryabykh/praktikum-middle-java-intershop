@@ -1,5 +1,8 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.dto.ItemDto;
+import com.pryabykh.intershop.dto.OrderDto;
+import com.pryabykh.intershop.dto.OrderItemDto;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Order;
 import com.pryabykh.intershop.entity.OrderItem;
@@ -27,9 +30,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void createOrder() {
+    public Long createOrder() {
         Long currentUserId = userService.fetchDefaultUserId();
-        List<CartItem> cartItems = cartItemRepository.findByUserId(currentUserId);
+        List<CartItem> cartItems = cartItemRepository.findByUserIdOrderByIdDesc(currentUserId);
         Order order = new Order();
         AtomicLong totalSum = new AtomicLong();
         List<OrderItem> orderItems = cartItems.stream().map(cartItem -> {
@@ -46,7 +49,28 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderItems(orderItems);
         order.setUserId(currentUserId);
         order.setTotalSum(totalSum.get());
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
         cartItemRepository.deleteByUserId(currentUserId);
+        return savedOrder.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDto findById(Long orderId) {
+        return orderRepository.findById(orderId).map(order -> {
+            return new OrderDto(
+                    order.getId(),
+                    order.getTotalSum() / 100,
+                    order.getOrderItems().stream().map(item -> {
+                        return new OrderItemDto(
+                                item.getId(),
+                                item.getTitle(),
+                                String.valueOf(item.getPrice() * item.getCount() / 100),
+                                String.valueOf(item.getImageId()),
+                                item.getCount()
+                        );
+                    }).toList()
+            );
+        }).orElseThrow();
     }
 }

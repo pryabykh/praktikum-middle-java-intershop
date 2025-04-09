@@ -40,7 +40,7 @@ public class ItemController {
     }
 
     @GetMapping("/items/{id}")
-    public String mainItems(@PathVariable("id") Long id,
+    public String fetchItem(@PathVariable("id") Long id,
                             Model model) {
         ItemDto item = itemService.findById(id);
         model.addAttribute("item", item);
