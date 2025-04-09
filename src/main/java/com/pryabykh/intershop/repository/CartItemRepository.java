@@ -17,4 +17,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     @EntityGraph(value = "cart-item-with-item-itself-entity-graph")
     List<CartItem> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }
