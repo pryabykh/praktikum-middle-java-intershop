@@ -1,5 +1,6 @@
 package com.pryabykh.intershop.controller;
 
+import com.pryabykh.intershop.dto.CreateItemDto;
 import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.dto.ItemsPage;
 import com.pryabykh.intershop.enums.SortType;
@@ -7,7 +8,9 @@ import com.pryabykh.intershop.service.ItemService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -45,5 +48,16 @@ public class ItemController {
         ItemDto item = itemService.findById(id);
         model.addAttribute("item", item);
         return "item";
+    }
+
+    @GetMapping("/create-item-form")
+    public String showCreateItemForm() {
+        return "create-item";
+    }
+
+    @PostMapping("/create-item")
+    public String createItem(@ModelAttribute CreateItemDto itemDto) {
+        itemService.createItem(itemDto);
+        return "redirect:/";
     }
 }

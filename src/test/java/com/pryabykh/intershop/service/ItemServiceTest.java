@@ -1,5 +1,6 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.dto.CreateItemDto;
 import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.enums.SortType;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,9 +43,12 @@ public class ItemServiceTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private ImagesService imagesService;
+
     @BeforeEach
     void setUp() {
-        Mockito.reset(itemRepository, userService, cartItemRepository);
+        Mockito.reset(itemRepository, userService, cartItemRepository, imagesService);
     }
 
     @Test
@@ -145,5 +150,23 @@ public class ItemServiceTest {
         assertEquals(String.valueOf(111L / 100L), itemDto.getPrice());
         assertEquals("title", itemDto.getTitle());
         assertEquals("description", itemDto.getDescription());
+    }
+
+    @Test
+    void createItem_whenValidDataProvided_shouldCreateNewItem() {
+        Item itemEntity = new Item();
+        itemEntity.setId(1L);
+        when(itemRepository.save(any())).thenReturn(itemEntity);
+
+        when(imagesService.upload(anyString())).thenReturn(1L);
+
+        CreateItemDto item = new CreateItemDto();
+        item.setBase64Image("base64Image");
+        item.setPriceRubles(100L);
+        item.setTitle("title");
+
+        Long itemId = itemService.createItem(item);
+
+        assertNotNull(item);
     }
 }

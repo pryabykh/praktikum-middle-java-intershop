@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.UUID;
 
 @Service
 public class ImagesServiceImpl implements ImagesService {
@@ -24,7 +26,7 @@ public class ImagesServiceImpl implements ImagesService {
 
     @Override
     @Transactional(readOnly = true)
-    public void download(Long imageId, HttpServletResponse response) {
+    public void upload(Long imageId, HttpServletResponse response) {
         Image image = imageRepository.findById(imageId).orElseThrow();
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
@@ -36,5 +38,14 @@ public class ImagesServiceImpl implements ImagesService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    @Transactional
+    public Long upload(String base64) {
+        Image image = new Image();
+        image.setName(UUID.randomUUID() + ".jpg");
+        image.setBytes(Base64.getDecoder().decode(base64));
+        return imageRepository.save(image).getId();
     }
 }

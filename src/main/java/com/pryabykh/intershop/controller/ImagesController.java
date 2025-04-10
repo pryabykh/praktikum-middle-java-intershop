@@ -19,6 +19,6 @@ public class ImagesController {
     @GetMapping("/images/{imageId}")
     public void downloadImage(@PathVariable("imageId") Long imageId,
                               HttpServletResponse response) {
-        imagesService.download(imageId, response);
+        imagesService.upload(imageId, response);
     }
 }

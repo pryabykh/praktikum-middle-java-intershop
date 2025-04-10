@@ -4,5 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface ImagesService {
 
-    void download(Long imageId, HttpServletResponse response);
+    void upload(Long imageId, HttpServletResponse response);
+
+    Long upload(String base64);
 }

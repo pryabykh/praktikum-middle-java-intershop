@@ -1,8 +1,10 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.dto.CreateItemDto;
 import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.dto.ItemsPage;
 import com.pryabykh.intershop.entity.CartItem;
+import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.enums.SortType;
 import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
@@ -23,12 +25,15 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
+    private final ImagesService imagesService;
     public ItemServiceImpl(ItemRepository itemRepository,
                            CartItemRepository cartItemRepository,
-                           UserService userService) {
+                           UserService userService,
+                           ImagesService imagesService) {
         this.itemRepository = itemRepository;
         this.cartItemRepository = cartItemRepository;
         this.userService = userService;
+        this.imagesService = imagesService;
     }
 
     @Override
@@ -65,6 +70,17 @@ public class ItemServiceImpl implements ItemService {
             assignCountToItems(List.of(itemDto));
             return itemDto;
         }).orElseThrow();
+    }
+
+    @Override
+    @Transactional
+    public Long createItem(CreateItemDto itemDto) {
+        Item item = new Item();
+        item.setTitle(itemDto.getTitle());
+        item.setDescription(itemDto.getDescription());
+        item.setPrice(itemDto.getPriceRubles() * 100);
+        item.setImageId(imagesService.upload(itemDto.getBase64Image()));
+        return itemRepository.save(item).getId();
     }
 
     private void assignCountToItems(List<ItemDto> items) {

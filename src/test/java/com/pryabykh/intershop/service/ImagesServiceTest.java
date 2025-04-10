@@ -1,11 +1,7 @@
 package com.pryabykh.intershop.service;
 
 import com.pryabykh.intershop.entity.Image;
-import com.pryabykh.intershop.entity.Item;
-import com.pryabykh.intershop.enums.SortType;
-import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ImageRepository;
-import com.pryabykh.intershop.repository.ItemRepository;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.Cookie;
@@ -15,24 +11,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +47,7 @@ public class ImagesServiceTest {
 
         when(imageRepository.findById(eq(1L))).thenReturn(Optional.of(image));
 
-        imagesService.download(1L, new HttpServletResponse() {
+        imagesService.upload(1L, new HttpServletResponse() {
             @Override
             public void addCookie(Cookie cookie) {
 
