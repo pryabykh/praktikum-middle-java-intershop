@@ -1,6 +1,5 @@
 package com.pryabykh.intershop.service;
 
-import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.dto.OrderDto;
 import com.pryabykh.intershop.dto.OrderItemDto;
 import com.pryabykh.intershop.entity.CartItem;
@@ -57,20 +56,32 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public OrderDto findById(Long orderId) {
-        return orderRepository.findById(orderId).map(order -> {
-            return new OrderDto(
-                    order.getId(),
-                    order.getTotalSum() / 100,
-                    order.getOrderItems().stream().map(item -> {
-                        return new OrderItemDto(
-                                item.getId(),
-                                item.getTitle(),
-                                String.valueOf(item.getPrice() * item.getCount() / 100),
-                                String.valueOf(item.getImageId()),
-                                item.getCount()
-                        );
-                    }).toList()
-            );
-        }).orElseThrow();
+        return orderRepository.findById(orderId).map(this::mapOrder).orElseThrow();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDto> findAll() {
+        Long currentUserId = userService.fetchDefaultUserId();
+        return orderRepository.findByUserIdOrderByIdDesc(currentUserId)
+                .stream()
+                .map(this::mapOrder)
+                .toList();
+    }
+
+    private OrderDto mapOrder(Order order) {
+        return new OrderDto(
+                order.getId(),
+                order.getTotalSum() / 100,
+                order.getOrderItems().stream().map(item -> {
+                    return new OrderItemDto(
+                            item.getId(),
+                            item.getTitle(),
+                            String.valueOf(item.getPrice() * item.getCount() / 100),
+                            String.valueOf(item.getImageId()),
+                            item.getCount()
+                    );
+                }).toList()
+        );
     }
 }

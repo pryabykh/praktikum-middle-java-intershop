@@ -104,4 +104,37 @@ public class OrderServiceTest {
         assertEquals("title", orderDto.getItems().get(0).getTitle());
         assertEquals(2, orderDto.getItems().get(0).getCount());
     }
+
+    @Test
+    void findAll_whenEntityExists_shouldReturnIt() {
+        when(userService.fetchDefaultUserId()).thenReturn(1L);
+        Order order = new Order();
+        order.setId(1L);
+        order.setUserId(1L);
+        order.setTotalSum(100L);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(1L);
+        orderItem.setPrice(100L);
+        orderItem.setOrder(order);
+        orderItem.setTitle("title");
+        orderItem.setDescription("desc");
+        orderItem.setImageId(11L);
+        orderItem.setCount(2);
+
+        order.setOrderItems(List.of(orderItem));
+
+        when(orderRepository.findByUserIdOrderByIdDesc(eq(1L)))
+                .thenReturn(List.of(order));
+
+        List<OrderDto> orders = orderService.findAll();
+
+        assertNotNull(orders);
+        assertEquals(1, orders.size());
+        assertEquals(1L, orders.get(0).getId());
+        assertEquals(1L, orders.get(0).getTotalSum());
+        assertEquals("11", orders.get(0).getItems().get(0).getImgPath());
+        assertEquals("title", orders.get(0).getItems().get(0).getTitle());
+        assertEquals(2, orders.get(0).getItems().get(0).getCount());
+    }
 }
