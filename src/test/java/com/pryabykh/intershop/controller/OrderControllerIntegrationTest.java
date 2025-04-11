@@ -4,12 +4,10 @@ import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Image;
 import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.entity.Order;
-import com.pryabykh.intershop.entity.User;
 import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ImageRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
 import com.pryabykh.intershop.repository.OrderRepository;
-import com.pryabykh.intershop.repository.UserRepository;
 import com.pryabykh.intershop.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
