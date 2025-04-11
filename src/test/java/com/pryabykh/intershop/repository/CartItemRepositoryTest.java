@@ -54,4 +54,32 @@ public class CartItemRepositoryTest extends DataJpaPostgreSQLTestContainerBaseTe
         assertFalse(cartItems.isEmpty());
         assertEquals(1, cartItems.size());
     }
+
+    @Test
+    @Sql(statements = {
+            "insert into intershop.users (name) values ('ADMIN');",
+            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));",
+            "insert into intershop.items (title, price, description, image_id) values ('IPhone 1', 100, 'IPhone 1', (select id from intershop.images order by id limit 1));",
+            "insert into intershop.carts (user_id, item_id, count) values ((select id from intershop.users order by id limit 1), (select id from intershop.items order by id limit 1), 1);",
+    })
+    void findByUserIdOrderByIdDesc_whenEntityExists_shouldReturnIt() {
+        Long userId = userRepository.findAll().stream().findFirst().map(User::getId).orElseThrow();
+        List<CartItem> cartItems = cartItemRepository.findByUserIdOrderByIdDesc(userId);
+        assertNotNull(cartItems);
+        assertFalse(cartItems.isEmpty());
+        assertEquals(1, cartItems.size());
+    }
+
+    @Test
+    @Sql(statements = {
+            "insert into intershop.users (name) values ('ADMIN');",
+            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));",
+            "insert into intershop.items (title, price, description, image_id) values ('IPhone 1', 100, 'IPhone 1', (select id from intershop.images order by id limit 1));",
+            "insert into intershop.carts (user_id, item_id, count) values ((select id from intershop.users order by id limit 1), (select id from intershop.items order by id limit 1), 1);",
+    })
+    void deleteByUserId_whenEntityExists_shouldDeleteIt() {
+        Long userId = userRepository.findAll().stream().findFirst().map(User::getId).orElseThrow();
+        cartItemRepository.deleteByUserId(userId);
+        assertTrue(cartItemRepository.findAll().isEmpty());
+    }
 }
