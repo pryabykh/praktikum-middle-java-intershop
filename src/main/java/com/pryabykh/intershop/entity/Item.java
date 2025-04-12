@@ -9,8 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class Item {
     @Column(name = "image_id", nullable = false)
     private Long imageId;
 
-    @Fetch(FetchMode.SUBSELECT)
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<CartItem> cartItems = new ArrayList<>();
 

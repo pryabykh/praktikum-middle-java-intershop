@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  intershop-app-pr:
+    image: 'intershop-app-pr:latest'
+    build:
+      context: .
+    container_name: intershop-app-pr
+    depends_on:
+      - db_intershop_pr
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_intershop_pr:5432/intershop
+      - SPRING_DATASOURCE_USERNAME=someUser
+      - SPRING_DATASOURCE_PASSWORD=d1ff1cultPasSw0rD
+  db_intershop_pr:
+    image: 'postgres:16-alpine'
+    container_name: db_intershop_pr
+    environment:
+      POSTGRES_USER: someUser
+      POSTGRES_PASSWORD: d1ff1cultPasSw0rD
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -3,7 +3,6 @@ package com.pryabykh.intershop.service;
 import com.pryabykh.intershop.entity.Image;
 import com.pryabykh.intershop.repository.ImageRepository;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
