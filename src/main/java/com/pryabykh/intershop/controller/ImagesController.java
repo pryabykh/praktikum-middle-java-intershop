@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/")
@@ -17,8 +18,8 @@ public class ImagesController {
     }
 
     @GetMapping("/images/{imageId}")
-    public void downloadImage(@PathVariable("imageId") Long imageId,
-                              HttpServletResponse response) {
-        imagesService.upload(imageId, response);
+    public Mono<Void> downloadImage(@PathVariable("imageId") Long imageId,
+                                    HttpServletResponse response) {
+        return imagesService.download(imageId, response);
     }
 }

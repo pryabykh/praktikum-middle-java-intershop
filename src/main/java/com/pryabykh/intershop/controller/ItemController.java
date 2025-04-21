@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping("/")
@@ -34,9 +35,9 @@ public class ItemController {
                             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                             @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
                             Model model) {
-        ItemsPage itemsPage = itemService.findAll(search, sort, pageSize, pageNumber);
-        model.addAttribute("paging", itemsPage.getPaging());
-        model.addAttribute("items", itemsPage.getItems());
+        Mono<ItemsPage> itemsPage = itemService.findAll(search, sort, pageSize, pageNumber);
+        model.addAttribute("paging", itemsPage.block().getPaging());
+        model.addAttribute("items", itemsPage.block().getItems());
         model.addAttribute("sort", sort.name());
         model.addAttribute("search", search);
         return "main";
@@ -45,7 +46,7 @@ public class ItemController {
     @GetMapping("/items/{id}")
     public String fetchItem(@PathVariable("id") Long id,
                             Model model) {
-        ItemDto item = itemService.findById(id);
+        ItemDto item = itemService.findById(id).block();
         model.addAttribute("item", item);
         return "item";
     }
@@ -57,7 +58,7 @@ public class ItemController {
 
     @PostMapping("/create-item")
     public String createItem(@ModelAttribute CreateItemDto itemDto) {
-        itemService.createItem(itemDto);
+        itemService.createItem(itemDto).subscribe();
         return "redirect:/";
     }
 }

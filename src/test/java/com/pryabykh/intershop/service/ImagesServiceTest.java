@@ -47,7 +47,7 @@ public class ImagesServiceTest {
 
         when(imageRepository.findById(eq(1L))).thenReturn(Optional.of(image));
 
-        imagesService.upload(1L, new HttpServletResponse() {
+        imagesService.download(1L, new HttpServletResponse() {
             @Override
             public void addCookie(Cookie cookie) {
 

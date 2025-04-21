@@ -1,10 +1,11 @@
 package com.pryabykh.intershop.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import reactor.core.publisher.Mono;
 
 public interface ImagesService {
 
-    void upload(Long imageId, HttpServletResponse response);
+    Mono<Void> download(Long imageId, HttpServletResponse response);
 
-    Long upload(String base64);
+    Mono<Long> upload(String base64);
 }

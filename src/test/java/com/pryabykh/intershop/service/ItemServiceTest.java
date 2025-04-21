@@ -158,7 +158,7 @@ public class ItemServiceTest {
         itemEntity.setId(1L);
         when(itemRepository.save(any())).thenReturn(itemEntity);
 
-        when(imagesService.upload(anyString())).thenReturn(1L);
+        when(imagesService.download(anyString())).thenReturn(1L);
 
         CreateItemDto item = new CreateItemDto();
         item.setBase64Image("base64Image");

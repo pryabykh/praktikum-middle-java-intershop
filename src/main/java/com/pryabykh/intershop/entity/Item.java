@@ -1,42 +1,30 @@
 package com.pryabykh.intershop.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import org.hibernate.annotations.BatchSize;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
-@Table(name = "items")
+@Table(name = "intershop.items")
 public class Item {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column("title")
     private String title;
 
-    @Column(name = "price", nullable = false)
+    @Column("price")
     private Long price;
 
-    @Column(name = "description", nullable = false)
+    @Column("description")
     private String description;
 
-    @Column(name = "image_id", nullable = false)
+    @Column("image_id")
     private Long imageId;
 
-    @BatchSize(size = 100)
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<CartItem> cartItems = new ArrayList<>();
+//    @BatchSize(size = 100)
+//    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+//    private List<CartItem> cartItems = new ArrayList<>();
 
     public Item() {
     }
@@ -83,13 +71,5 @@ public class Item {
 
     public void setImageId(Long imageId) {
         this.imageId = imageId;
-    }
-
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
     }
 }

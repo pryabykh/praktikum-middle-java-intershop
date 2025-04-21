@@ -1,24 +1,20 @@
 package com.pryabykh.intershop.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
-@Table(name = "images")
+
+@Table(name = "intershop.images")
 public class Image {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column("name")
     private String name;
 
-    @Column(name = "bytes", nullable = false, columnDefinition = "BYTEA")
+    @Column("bytes")
     private byte[] bytes;
 
     public Long getId() {

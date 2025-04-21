@@ -1,6 +1,8 @@
 package com.pryabykh.intershop.dto;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +12,9 @@ public class ItemsPage {
     private final Paging paging;
     private final List<List<ItemDto>> items;
 
-    public ItemsPage(Page<ItemDto> page) {
+    public ItemsPage(List<ItemDto> page, long totalCount, int pageSize, int pageNumber) {
         List<List<ItemDto>> items = new ArrayList<>();
-        this.paging = new Paging(page);
+        this.paging = new Paging(page, totalCount, pageSize, pageNumber);
         int rowCount = 1;
         for (ItemDto itemDto : page) {
             if (rowCount > 3) {
@@ -46,10 +48,11 @@ public class ItemsPage {
 
         private final int pageNumber;
 
-        public Paging(Page<ItemDto> page) {
-            this.page = page;
-            this.pageSize = page.getPageable().getPageSize();
-            this.pageNumber = page.getPageable().getPageNumber();
+        public Paging(List<ItemDto> page, long totalCount, int pageSize, int pageNumber) {
+            Page<ItemDto> pageImpl = new PageImpl<>(page, PageRequest.of(pageNumber, pageSize), totalCount);
+            this.page = pageImpl;
+            this.pageSize = pageImpl.getPageable().getPageSize();
+            this.pageNumber = pageImpl.getPageable().getPageNumber();
         }
 
         public boolean hasPrevious() {

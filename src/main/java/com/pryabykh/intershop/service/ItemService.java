@@ -4,12 +4,13 @@ import com.pryabykh.intershop.dto.CreateItemDto;
 import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.dto.ItemsPage;
 import com.pryabykh.intershop.enums.SortType;
+import reactor.core.publisher.Mono;
 
 public interface ItemService {
 
-    ItemsPage findAll(String name, SortType sort, int pageSize, int pageNumber);
+    Mono<ItemsPage> findAll(String name, SortType sortType, int pageSize, int pageNumber);
 
-    ItemDto findById(Long id);
+    Mono<ItemDto> findById(Long id);
 
-    Long createItem(CreateItemDto itemDto);
+    Mono<Long> createItem(CreateItemDto itemDto);
 }
