@@ -1,6 +1,8 @@
 db:
   schema-name: intershop
 spring:
+  thymeleaf:
+    encoding: UTF-8
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/myblog
     username: user

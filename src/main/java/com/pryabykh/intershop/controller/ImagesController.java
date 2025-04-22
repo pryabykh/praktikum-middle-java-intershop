@@ -1,7 +1,7 @@
 package com.pryabykh.intershop.controller;
 
 import com.pryabykh.intershop.service.ImagesService;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class ImagesController {
 
     @GetMapping("/images/{imageId}")
     public Mono<Void> downloadImage(@PathVariable("imageId") Long imageId,
-                                    HttpServletResponse response) {
+                                    ServerHttpResponse response) {
         return imagesService.download(imageId, response);
     }
 }

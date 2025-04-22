@@ -1,18 +1,17 @@
 package com.pryabykh.intershop.controller;
 
 import com.pryabykh.intershop.dto.CreateItemDto;
-import com.pryabykh.intershop.dto.ItemDto;
-import com.pryabykh.intershop.dto.ItemsPage;
 import com.pryabykh.intershop.enums.SortType;
 import com.pryabykh.intershop.service.ItemService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -25,40 +24,40 @@ public class ItemController {
     }
 
     @GetMapping
-    public String root() {
-        return "redirect:/main/items";
+    public Mono<String> root() {
+        return Mono.just("redirect:/main/items");
     }
 
-    @GetMapping("/main/items")
-    public String mainItems(@RequestParam(value = "search", required = false) String search,
-                            @RequestParam(value = "sort", defaultValue = "NO") SortType sort,
-                            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-                            @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
-                            Model model) {
-        Mono<ItemsPage> itemsPage = itemService.findAll(search, sort, pageSize, pageNumber);
-        model.addAttribute("paging", itemsPage.block().getPaging());
-        model.addAttribute("items", itemsPage.block().getItems());
-        model.addAttribute("sort", sort.name());
-        model.addAttribute("search", search);
-        return "main";
+    @GetMapping(value = "/main/items", produces = MediaType.TEXT_HTML_VALUE)
+    public Mono<Rendering> mainItems(@RequestParam(value = "search", required = false) String search,
+                                     @RequestParam(value = "sort", defaultValue = "NO") SortType sort,
+                                     @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                     @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber) {
+        return itemService.findAll(search, sort, pageSize, pageNumber)
+                .map(itemsPage -> Rendering.view("main")
+                        .modelAttribute("paging", itemsPage.getPaging())
+                        .modelAttribute("items", itemsPage.getItems())
+                        .modelAttribute("sort", sort.name())
+                        .modelAttribute("search", search)
+                        .build());
     }
 
     @GetMapping("/items/{id}")
-    public String fetchItem(@PathVariable("id") Long id,
-                            Model model) {
-        ItemDto item = itemService.findById(id).block();
-        model.addAttribute("item", item);
-        return "item";
+    public Mono<Rendering> fetchItem(@PathVariable("id") Long id) {
+        return itemService.findById(id)
+                .map(item -> Rendering.view("item")
+                        .modelAttribute("item", item)
+                        .build());
     }
 
     @GetMapping("/create-item-form")
-    public String showCreateItemForm() {
-        return "create-item";
+    public Mono<String> showCreateItemForm() {
+        return Mono.just("create-item");
     }
 
     @PostMapping("/create-item")
-    public String createItem(@ModelAttribute CreateItemDto itemDto) {
-        itemService.createItem(itemDto).block();
-        return "redirect:/";
+    public Mono<String> createItem(@ModelAttribute CreateItemDto itemDto) {
+        return itemService.createItem(itemDto)
+                .then(Mono.just("redirect:/"));
     }
 }

@@ -1,14 +1,13 @@
 package com.pryabykh.intershop.controller;
 
-import com.pryabykh.intershop.dto.CartDto;
 import com.pryabykh.intershop.service.CartItemService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.reactive.result.view.Rendering;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping("/")
@@ -19,33 +18,34 @@ public class CartItemController {
         this.cartItemService = cartItemService;
     }
 
-    @PostMapping("/main/items/{itemId}")
-    public String modifyCartAndRedirectToMain(@PathVariable("itemId") Long itemId,
-                                              @RequestParam("action") String action) {
-        cartItemService.modifyCart(itemId, action).block();
-        return "redirect:/main/items";
+    @GetMapping("/modify/main/items/{itemId}")
+    public Mono<String> modifyCartAndRedirectToMain(@PathVariable("itemId") Long itemId,
+                                                    @RequestParam("action") String action) {
+        return cartItemService.modifyCart(itemId, action)
+                .then(Mono.just("redirect:/main/items"));
     }
 
-    @PostMapping("/items/{itemId}")
-    public String modifyCartAndRedirectToItem(@PathVariable("itemId") Long itemId,
-                                              @RequestParam("action") String action) {
-        cartItemService.modifyCart(itemId, action).block();
-        return "redirect:/items/" + itemId;
+    @GetMapping("/modify/items/{itemId}")
+    public Mono<String> modifyCartAndRedirectToItem(@PathVariable("itemId") Long itemId,
+                                                    @RequestParam("action") String action) {
+        return cartItemService.modifyCart(itemId, action)
+                .then(Mono.just("redirect:/items/" + itemId));
     }
 
-    @PostMapping("/cart/items/{itemId}")
-    public String modifyCartAndRedirectToCart(@PathVariable("itemId") Long itemId,
-                                              @RequestParam("action") String action) {
-        cartItemService.modifyCart(itemId, action).block();
-        return "redirect:/cart/items";
+    @GetMapping("/modify/cart/items/{itemId}")
+    public Mono<String> modifyCartAndRedirectToCart(@PathVariable("itemId") Long itemId,
+                                                    @RequestParam("action") String action) {
+        return cartItemService.modifyCart(itemId, action)
+                .then(Mono.just("redirect:/cart/items"));
     }
 
     @GetMapping("/cart/items")
-    public String fetchCartItems(Model model) {
-        CartDto cartDto = cartItemService.fetchCartItems().block();
-        model.addAttribute("items", cartDto.getItems());
-        model.addAttribute("total", cartDto.getTotal());
-        model.addAttribute("empty", cartDto.isEmpty());
-        return "cart";
+    public Mono<Rendering> fetchCartItems() {
+        return cartItemService.fetchCartItems()
+                .map(cartDto -> Rendering.view("cart")
+                        .modelAttribute("items", cartDto.getItems())
+                        .modelAttribute("total", cartDto.getTotal())
+                        .modelAttribute("empty", cartDto.isEmpty())
+                        .build());
     }
 }

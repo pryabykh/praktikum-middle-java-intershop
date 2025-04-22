@@ -1,11 +1,11 @@
 package com.pryabykh.intershop.service;
 
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import reactor.core.publisher.Mono;
 
 public interface ImagesService {
 
-    Mono<Void> download(Long imageId, HttpServletResponse response);
+    Mono<Void> download(Long imageId, ServerHttpResponse response);
 
     Mono<Long> upload(String base64);
 }
