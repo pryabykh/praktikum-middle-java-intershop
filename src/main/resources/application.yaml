@@ -13,5 +13,8 @@ spring:
     liquibase-schema: ${db.schema-name}
     default-schema: ${db.schema-name}
     change-log: classpath:db/changelog/db.changelog-master.xml
+    url: jdbc:postgresql://localhost:5432/myblog
+    user: user
+    password: pass
   application:
     name: intershop
