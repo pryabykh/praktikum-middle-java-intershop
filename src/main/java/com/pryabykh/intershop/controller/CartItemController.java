@@ -22,21 +22,21 @@ public class CartItemController {
     @PostMapping("/main/items/{itemId}")
     public String modifyCartAndRedirectToMain(@PathVariable("itemId") Long itemId,
                                               @RequestParam("action") String action) {
-        cartItemService.modifyCart(itemId, action).subscribe();
+        cartItemService.modifyCart(itemId, action).block();
         return "redirect:/main/items";
     }
 
     @PostMapping("/items/{itemId}")
     public String modifyCartAndRedirectToItem(@PathVariable("itemId") Long itemId,
                                               @RequestParam("action") String action) {
-        cartItemService.modifyCart(itemId, action).subscribe();
+        cartItemService.modifyCart(itemId, action).block();
         return "redirect:/items/" + itemId;
     }
 
     @PostMapping("/cart/items/{itemId}")
     public String modifyCartAndRedirectToCart(@PathVariable("itemId") Long itemId,
                                               @RequestParam("action") String action) {
-        cartItemService.modifyCart(itemId, action).subscribe();
+        cartItemService.modifyCart(itemId, action).block();
         return "redirect:/cart/items";
     }
 

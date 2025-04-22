@@ -58,7 +58,7 @@ public class ItemController {
 
     @PostMapping("/create-item")
     public String createItem(@ModelAttribute CreateItemDto itemDto) {
-        itemService.createItem(itemDto).subscribe();
+        itemService.createItem(itemDto).block();
         return "redirect:/";
     }
 }

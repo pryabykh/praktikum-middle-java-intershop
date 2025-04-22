@@ -57,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
                                     orderItem.setDescription(item.getDescription());
                                     orderItem.setTitle(item.getTitle());
                                     orderItem.setImageId(item.getImageId());
+                                    orderItem.setPrice(item.getPrice());
 
                                     long itemTotal = item.getPrice() * cartItem.getCount();
                                     totalSum.addAndGet(itemTotal);
