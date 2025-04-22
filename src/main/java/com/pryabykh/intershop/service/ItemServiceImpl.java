@@ -18,11 +18,14 @@ import java.util.Optional;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final ImagesService imagesService;
+    private final UserService userService;
 
     public ItemServiceImpl(ItemRepository itemRepository,
-                           ImagesService imagesService) {
+                           ImagesService imagesService,
+                           UserService userService) {
         this.itemRepository = itemRepository;
         this.imagesService = imagesService;
+        this.userService = userService;
     }
 
     @Override
@@ -33,20 +36,32 @@ public class ItemServiceImpl implements ItemService {
         Flux<ItemDto> itemsFlux = Optional.ofNullable(name)
                 .map(n -> {
                     if (SortType.ALPHA.equals(sortType)) {
-                        return itemRepository.findAllByNameLikeOrderByTitleAsc(n, pageSize, offset);
+                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                            return itemRepository.findAllByNameLikeOrderByTitleAsc(userId, n, pageSize, offset);
+                        });
                     } else if (SortType.PRICE.equals(sortType)) {
-                        return itemRepository.findAllByNameLikeOrderByPriceAsc(n, pageSize, offset);
+                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                            return itemRepository.findAllByNameLikeOrderByPriceAsc(userId, n, pageSize, offset);
+                        });
                     } else {
-                        return itemRepository.findAllByNameLikeOrderByIdDesc(n, pageSize, offset);
+                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                            return itemRepository.findAllByNameLikeOrderByIdDesc(userId, n, pageSize, offset);
+                        });
                     }
                 })
                 .orElseGet(() -> {
                     if (SortType.ALPHA.equals(sortType)) {
-                        return itemRepository.findAllOrderByTitleAsc(pageSize, offset);
+                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                            return itemRepository.findAllOrderByTitleAsc(userId, pageSize, offset);
+                        });
                     } else if (SortType.PRICE.equals(sortType)) {
-                        return itemRepository.findAllOrderByPriceAsc(pageSize, offset);
+                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                            return itemRepository.findAllOrderByPriceAsc(userId, pageSize, offset);
+                        });
                     } else {
-                        return itemRepository.findAllOrderByIdDesc(pageSize, offset);
+                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                            return itemRepository.findAllOrderByIdDesc(userId, pageSize, offset);
+                        });
                     }
                 })
                 .map(item -> {
@@ -55,11 +70,10 @@ public class ItemServiceImpl implements ItemService {
                             item.getTitle(),
                             String.valueOf(item.getPrice() / 100),
                             item.getDescription(),
-                            String.valueOf(item.getImageId())
+                            String.valueOf(item.getImageId()),
+                            item.getCount()
                     );
                 });
-
-//        Flux<ItemDto> itemsWithCount = assignCountToItems(itemsFlux); //todo fixme
 
         Mono<Long> totalCountMono = Optional.ofNullable(name)
                 .map(itemRepository::countByNameLike)
@@ -75,17 +89,19 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public Mono<ItemDto> findById(Long id) {
-        return itemRepository.findById(id).map(item -> {
-            ItemDto itemDto = new ItemDto(
-                    item.getId(),
-                    item.getTitle(),
-                    String.valueOf(item.getPrice() / 100),
-                    item.getDescription(),
-                    String.valueOf(item.getImageId())
-            );
-//            assignCountToItems(List.of(itemDto)); //todo fixme
-            return itemDto;
-        }).switchIfEmpty(Mono.error(new RuntimeException()));
+        return userService.fetchDefaultUserId().flatMap(userId -> {
+            return itemRepository.findItemById(userId, id).map(item -> {
+                ItemDto itemDto = new ItemDto(
+                        item.getId(),
+                        item.getTitle(),
+                        String.valueOf(item.getPrice() / 100),
+                        item.getDescription(),
+                        String.valueOf(item.getImageId()),
+                        item.getCount()
+                );
+                return itemDto;
+            }).switchIfEmpty(Mono.error(new RuntimeException()));
+        });
     }
 
     @Override

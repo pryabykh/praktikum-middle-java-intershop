@@ -22,6 +22,9 @@ public class Item {
     @Column("image_id")
     private Long imageId;
 
+    @Column("count")
+    private Integer count;
+
 //    @BatchSize(size = 100)
 //    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 //    private List<CartItem> cartItems = new ArrayList<>();
@@ -71,5 +74,13 @@ public class Item {
 
     public void setImageId(Long imageId) {
         this.imageId = imageId;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }
