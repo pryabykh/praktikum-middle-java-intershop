@@ -1,33 +1,62 @@
 package com.pryabykh.intershop.repository;
 
+import com.pryabykh.intershop.SpringBootPostgreSQLTestContainerBaseTest;
 import com.pryabykh.intershop.entity.Image;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
-
-import java.util.Optional;
+import org.springframework.r2dbc.core.DatabaseClient;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ImageRepositoryTest extends DataJpaPostgreSQLTestContainerBaseTest {
+public class ImageRepositoryTest extends SpringBootPostgreSQLTestContainerBaseTest {
 
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private DatabaseClient databaseClient;
+
+    @BeforeEach
+    void setUp() {
+        Mono<Void> setup = databaseClient.sql("""
+                        insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));
+                        """)
+                        .fetch()
+                        .rowsUpdated()
+                .then();
+
+        setup.block();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Delete all data using native SQL queries
+        Mono<Void> cleanup = databaseClient.sql("DELETE FROM intershop.images;")
+                .fetch()
+                .rowsUpdated()
+                .then();
+
+        cleanup.block(); // Block to ensure cleanup completes after each test
+    }
 
     @Test
-    @Sql(statements = {
-            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));"
-    })
     void findById_whenEntityExists_shouldReturnIt() {
-        Optional<Image> image = imageRepository.findById(
-                imageRepository.findAll().stream().findFirst().map(Image::getId).orElseThrow()
-        );
-        assertNotNull(image);
-        assertTrue(image.isPresent());
-        assertNotNull(image.get().getId());
-        assertEquals("small_image.png", image.get().getName());
-        assertNotNull(image.get().getBytes());
+        Mono<Image> imageMono = imageRepository.findAll()
+                .next()
+                .flatMap(image -> imageRepository.findById(image.getId()));
+
+        StepVerifier.create(imageMono)
+                .assertNext(image -> {
+                    assertNotNull(image);
+                    assertNotNull(image.getId());
+                    assertEquals("small_image.png", image.getName());
+                    assertNotNull(image.getBytes());
+                })
+                .expectComplete()
+                .verify();
     }
 }

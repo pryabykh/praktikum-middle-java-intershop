@@ -1,21 +1,21 @@
 package com.pryabykh.intershop.repository;
 
+import com.pryabykh.intershop.SpringBootPostgreSQLTestContainerBaseTest;
 import com.pryabykh.intershop.entity.CartItem;
-import com.pryabykh.intershop.entity.Item;
-import com.pryabykh.intershop.entity.User;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.r2dbc.core.DatabaseClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CartItemRepositoryTest extends DataJpaPostgreSQLTestContainerBaseTest {
+public class CartItemRepositoryTest extends SpringBootPostgreSQLTestContainerBaseTest {
 
     @Autowired
     private CartItemRepository cartItemRepository;
@@ -23,63 +23,104 @@ public class CartItemRepositoryTest extends DataJpaPostgreSQLTestContainerBaseTe
     private UserRepository userRepository;
     @Autowired
     private ItemRepository itemRepository;
+    @Autowired
+    private DatabaseClient databaseClient;
+
+    @BeforeEach
+    void setUp() {
+        Mono<Void> setup = databaseClient.sql("""
+                INSERT INTO intershop.users (name) VALUES ('ADMIN');
+                """)
+                .fetch()
+                .rowsUpdated()
+                .then(databaseClient.sql("""
+                        INSERT INTO intershop.images (name, bytes) VALUES ('small_image.png', DECODE('74657374', 'hex'));
+                        """)
+                        .fetch()
+                        .rowsUpdated())
+                .then(databaseClient.sql("""
+                        INSERT INTO intershop.items (title, price, description, image_id)
+                        VALUES ('IPhone 1', 100, 'IPhone 1', (SELECT id FROM intershop.images ORDER BY id LIMIT 1));
+                        """)
+                        .fetch()
+                        .rowsUpdated())
+                .then(databaseClient.sql("""
+                        INSERT INTO intershop.carts (user_id, item_id, count)
+                        VALUES ((SELECT id FROM intershop.users ORDER BY id LIMIT 1),
+                                (SELECT id FROM intershop.items ORDER BY id LIMIT 1), 1);
+                        """)
+                        .fetch()
+                        .rowsUpdated())
+                .then();
+
+        setup.block();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Delete all data using native SQL queries
+        Mono<Void> cleanup = databaseClient.sql("DELETE FROM intershop.carts;")
+                .fetch()
+                .rowsUpdated()
+                .then(databaseClient.sql("DELETE FROM intershop.order_items;").fetch().rowsUpdated())
+                .then(databaseClient.sql("DELETE FROM intershop.orders;").fetch().rowsUpdated())
+                .then(databaseClient.sql("DELETE FROM intershop.items;").fetch().rowsUpdated())
+                .then(databaseClient.sql("DELETE FROM intershop.images;").fetch().rowsUpdated())
+                .then(databaseClient.sql("DELETE FROM intershop.users;").fetch().rowsUpdated())
+                .then();
+
+        cleanup.block(); // Block to ensure cleanup completes after each test
+    }
 
     @Test
-    @Sql(statements = {
-            "insert into intershop.users (name) values ('ADMIN');",
-            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));",
-            "insert into intershop.items (title, price, description, image_id) values ('IPhone 1', 100, 'IPhone 1', (select id from intershop.images order by id limit 1));",
-            "insert into intershop.carts (user_id, item_id, count) values ((select id from intershop.users order by id limit 1), (select id from intershop.items order by id limit 1), 1);",
-    })
     void findByItemIdAndUserId_whenEntityExists_shouldReturnIt() {
-        Long userId = userRepository.findAll().stream().findFirst().map(User::getId).orElseThrow();
-        Long itemId = itemRepository.findAll().stream().findFirst().map(Item::getId).orElseThrow();
-        Optional<CartItem> cartItem = cartItemRepository.findByItemIdAndUserId(itemId, userId);
-        assertNotNull(cartItem);
-        assertTrue(cartItem.isPresent());
+        Long userId = userRepository.findAll().blockFirst().getId();
+        Long itemId = itemRepository.findAll().blockFirst().getId();
+
+        Mono<CartItem> cartItemMono = cartItemRepository.findByItemIdAndUserId(itemId, userId);
+
+        StepVerifier.create(cartItemMono)
+                .assertNext(cartItem -> assertNotNull(cartItem))
+                .expectComplete()
+                .verify();
     }
 
     @Test
-    @Sql(statements = {
-            "insert into intershop.users (name) values ('ADMIN');",
-            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));",
-            "insert into intershop.items (title, price, description, image_id) values ('IPhone 1', 100, 'IPhone 1', (select id from intershop.images order by id limit 1));",
-            "insert into intershop.carts (user_id, item_id, count) values ((select id from intershop.users order by id limit 1), (select id from intershop.items order by id limit 1), 1);",
-    })
     void findByItemIdInAndUserId_whenEntityExists_shouldReturnIt() {
-        Long userId = userRepository.findAll().stream().findFirst().map(User::getId).orElseThrow();
-        Long itemId = itemRepository.findAll().stream().findFirst().map(Item::getId).orElseThrow();
-        List<CartItem> cartItems = cartItemRepository.findByItemIdInAndUserId(List.of(itemId), userId);
-        assertNotNull(cartItems);
-        assertFalse(cartItems.isEmpty());
-        assertEquals(1, cartItems.size());
+        Long userId = userRepository.findAll().blockFirst().getId();
+        Long itemId = itemRepository.findAll().blockFirst().getId();
+
+        Flux<CartItem> cartItemsFlux = cartItemRepository.findByItemIdInAndUserId(List.of(itemId), userId);
+
+        StepVerifier.create(cartItemsFlux)
+                .assertNext(cartItem -> assertNotNull(cartItem))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
-    @Sql(statements = {
-            "insert into intershop.users (name) values ('ADMIN');",
-            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));",
-            "insert into intershop.items (title, price, description, image_id) values ('IPhone 1', 100, 'IPhone 1', (select id from intershop.images order by id limit 1));",
-            "insert into intershop.carts (user_id, item_id, count) values ((select id from intershop.users order by id limit 1), (select id from intershop.items order by id limit 1), 1);",
-    })
     void findByUserIdOrderByIdDesc_whenEntityExists_shouldReturnIt() {
-        Long userId = userRepository.findAll().stream().findFirst().map(User::getId).orElseThrow();
-        List<CartItem> cartItems = cartItemRepository.findByUserIdOrderByIdDesc(userId);
-        assertNotNull(cartItems);
-        assertFalse(cartItems.isEmpty());
-        assertEquals(1, cartItems.size());
+        Long userId = userRepository.findAll().blockFirst().getId();
+
+        Flux<CartItem> cartItemsFlux = cartItemRepository.findByUserIdOrderByIdDesc(userId);
+
+        StepVerifier.create(cartItemsFlux)
+                .assertNext(cartItem -> assertNotNull(cartItem))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
-    @Sql(statements = {
-            "insert into intershop.users (name) values ('ADMIN');",
-            "insert into intershop.images (name, bytes) values ('small_image.png', decode('74657374', 'hex'));",
-            "insert into intershop.items (title, price, description, image_id) values ('IPhone 1', 100, 'IPhone 1', (select id from intershop.images order by id limit 1));",
-            "insert into intershop.carts (user_id, item_id, count) values ((select id from intershop.users order by id limit 1), (select id from intershop.items order by id limit 1), 1);",
-    })
     void deleteByUserId_whenEntityExists_shouldDeleteIt() {
-        Long userId = userRepository.findAll().stream().findFirst().map(User::getId).orElseThrow();
-        cartItemRepository.deleteByUserId(userId);
-        assertTrue(cartItemRepository.findAll().isEmpty());
+        Long userId = userRepository.findAll().blockFirst().getId();
+
+        Mono<Void> deleteResult = cartItemRepository.deleteByUserId(userId);
+
+        StepVerifier.create(deleteResult)
+                .verifyComplete();
+
+        StepVerifier.create(cartItemRepository.findAll())
+                .expectNextCount(0)
+                .verifyComplete();
     }
 }
