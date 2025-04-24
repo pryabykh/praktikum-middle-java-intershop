@@ -1,4 +1,4 @@
-# praktikum-middle-java-intershop-v1
+# praktikum-middle-java-intershop-v2
 
 ## Java
 Приложение запускается на версии Java 21

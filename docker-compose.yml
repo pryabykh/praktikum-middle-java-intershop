@@ -7,16 +7,19 @@ services:
       context: .
     container_name: intershop-app-pr
     depends_on:
-      - db_intershop_pr
+      - db-intershop-pr
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_intershop_pr:5432/intershop
-      - SPRING_DATASOURCE_USERNAME=someUser
-      - SPRING_DATASOURCE_PASSWORD=d1ff1cultPasSw0rD
-  db_intershop_pr:
+      - SPRING_R2DBC_URL=r2dbc:postgresql://db-intershop-pr:5432/intershop
+      - SPRING_R2DBC_USERNAME=someUser
+      - SPRING_R2DBC_PASSWORD=d1ff1cultPasSw0rD
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://db-intershop-pr:5432/intershop
+      - SPRING_LIQUIBASE_USER=someUser
+      - SPRING_LIQUIBASE_PASSWORD=d1ff1cultPasSw0rD
+  db-intershop-pr:
     image: 'postgres:16-alpine'
-    container_name: db_intershop_pr
+    container_name: db-intershop-pr
     environment:
       POSTGRES_USER: someUser
       POSTGRES_PASSWORD: d1ff1cultPasSw0rD
