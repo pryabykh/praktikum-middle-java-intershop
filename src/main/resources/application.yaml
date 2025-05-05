@@ -1,6 +1,13 @@
 db:
   schema-name: intershop
 spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  cache:
+    redis:
+      time-to-live: PT60S    # TTL по умолчанию для кешей
   thymeleaf:
     encoding: UTF-8
   r2dbc:
