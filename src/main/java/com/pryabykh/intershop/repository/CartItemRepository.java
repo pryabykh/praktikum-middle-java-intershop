@@ -1,6 +1,7 @@
 package com.pryabykh.intershop.repository;
 
 import com.pryabykh.intershop.entity.CartItem;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,10 @@ public interface CartItemRepository extends R2dbcRepository<CartItem, Long> {
 
     Flux<CartItem> findByItemIdInAndUserId(List<Long> itemIds, Long userId);
 
+    @Cacheable(
+            value = "cartItems",
+            key = "#userId"
+    )
     Flux<CartItem> findByUserIdOrderByIdDesc(Long userId);
 
     Mono<Void> deleteByUserId(Long userId);

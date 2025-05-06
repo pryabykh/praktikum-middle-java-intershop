@@ -14,6 +14,9 @@ public class ItemDto {
 
     private int count;
 
+    public ItemDto() {
+    }
+
     public ItemDto(Long id, String title, String price, String description, String imgPath) {
         this.id = id;
         this.title = title;

@@ -1,6 +1,8 @@
 package com.pryabykh.intershop.config;
 
-import com.pryabykh.intershop.dto.ItemDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pryabykh.intershop.entity.Image;
+import com.pryabykh.intershop.entity.Item;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,16 +17,46 @@ import java.time.temporal.ChronoUnit;
 public class RedisSerializationConfig {
 
     @Bean
-    public RedisCacheManagerBuilderCustomizer weatherCacheCustomizer() {
+    public RedisCacheManagerBuilderCustomizer weatherCacheCustomizer(ObjectMapper objectMapper) {
         return builder -> builder.withCacheConfiguration(
-                "item",                                         // Имя кеша
-                RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.of(1, ChronoUnit.MINUTES))  // TTL
-                        .serializeValuesWith(                          // Сериализация JSON
-                                RedisSerializationContext.SerializationPair.fromSerializer(
-                                        new Jackson2JsonRedisSerializer<>(ItemDto.class)
+                        "items",                                         // Имя кеша
+                        RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.of(5, ChronoUnit.MINUTES))  // TTL
+                                .serializeValuesWith(                          // Сериализация JSON
+                                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                                new Jackson2JsonRedisSerializer<>(Item.class)
+                                        )
                                 )
-                        )
-        );
+                )
+                .withCacheConfiguration(
+                        "itemsList",                                         // Имя кеша
+                        RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.of(5, ChronoUnit.MINUTES))  // TTL
+                                .serializeValuesWith(                          // Сериализация JSON
+                                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                                new ItemListRedisSerializer(objectMapper)
+                                        )
+                                )
+                )
+                .withCacheConfiguration(
+                        "images",                                         // Имя кеша
+                        RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.of(60, ChronoUnit.MINUTES))  // TTL
+                                .serializeValuesWith(                          // Сериализация JSON
+                                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                                new Jackson2JsonRedisSerializer<>(Image.class)
+                                        )
+                                )
+                )
+                .withCacheConfiguration(
+                        "cartItems",                                         // Имя кеша
+                        RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.of(5, ChronoUnit.MINUTES))  // TTL
+                                .serializeValuesWith(                          // Сериализация JSON
+                                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                                new CartItemListRedisSerializer(objectMapper)
+                                        )
+                                )
+                );
     }
 }
