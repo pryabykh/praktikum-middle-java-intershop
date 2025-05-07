@@ -16,19 +16,23 @@ public class CartItemServiceImpl implements CartItemService {
     private final ItemRepository itemRepository;
 
     private final UserService userService;
+    private final CacheService cacheService;
 
     public CartItemServiceImpl(CartItemRepository cartItemRepository,
                                ItemRepository itemRepository,
-                               UserService userService) {
+                               UserService userService,
+                               CacheService cacheService) {
         this.cartItemRepository = cartItemRepository;
         this.itemRepository = itemRepository;
         this.userService = userService;
+        this.cacheService = cacheService;
     }
 
     @Override
     @Transactional
     public Mono<Void> modifyCart(Long itemId, String cartAction) {
         return userService.fetchDefaultUserId()
+                .flatMap(userId -> cacheService.evictCaches(userId, itemId).then(Mono.just(userId)))
                 .flatMap(userId -> cartItemRepository.findByItemIdAndUserId(itemId, userId)
                         .flatMap(cartItem -> {
                             if (CartActions.PLUS.equals(cartAction)) {
