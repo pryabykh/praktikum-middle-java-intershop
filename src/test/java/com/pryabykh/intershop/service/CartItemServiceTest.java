@@ -18,9 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +42,9 @@ public class CartItemServiceTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private CacheService cacheService;
+
     @Captor
     private ArgumentCaptor<CartItem> cartItemArgumentCaptor;
 
@@ -56,6 +56,7 @@ public class CartItemServiceTest {
     @Test
     void modifyCart_whenPlus_cartCountShouldBeAdded() {
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(cacheService.evictCaches(anyLong(), anyLong())).thenReturn(Mono.empty());
         CartItem cartItem = new CartItem();
         cartItem.setUserId(1L);
         cartItem.setCount(1);
@@ -66,11 +67,14 @@ public class CartItemServiceTest {
         verify(cartItemRepository, times(1)).save(cartItemArgumentCaptor.capture());
 
         Assertions.assertEquals(2, cartItemArgumentCaptor.getValue().getCount());
+
+        verify(cacheService, times(1)).evictCaches(anyLong(), anyLong());
     }
 
     @Test
     void modifyCart_whenMinus_cartCountShouldBeSubtracted() {
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(cacheService.evictCaches(anyLong(), anyLong())).thenReturn(Mono.empty());
         CartItem cartItem = new CartItem();
         cartItem.setUserId(1L);
         cartItem.setCount(2);
@@ -81,11 +85,14 @@ public class CartItemServiceTest {
         verify(cartItemRepository, times(1)).save(cartItemArgumentCaptor.capture());
 
         Assertions.assertEquals(1, cartItemArgumentCaptor.getValue().getCount());
+
+        verify(cacheService, times(1)).evictCaches(anyLong(), anyLong());
     }
 
     @Test
     void modifyCart_whenDelete_cartItemShouldBeDeleted() {
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(cacheService.evictCaches(anyLong(), anyLong())).thenReturn(Mono.empty());
         CartItem cartItem = new CartItem();
         cartItem.setUserId(1L);
         cartItem.setCount(2);
@@ -94,6 +101,8 @@ public class CartItemServiceTest {
 
         cartItemService.modifyCart(1L, CartActions.DELETE).block();
         verify(cartItemRepository, times(1)).delete(cartItem);
+
+        verify(cacheService, times(1)).evictCaches(anyLong(), anyLong());
     }
 
     @Test

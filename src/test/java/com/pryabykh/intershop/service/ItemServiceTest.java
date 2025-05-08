@@ -51,6 +51,9 @@ public class ItemServiceTest {
     @MockitoBean
     private ImagesService imagesService;
 
+    @MockitoBean
+    private CacheService cacheService;
+
     @BeforeEach
     void setUp() {
         Mockito.reset(itemRepository, userService, cartItemRepository, imagesService);
@@ -168,6 +171,7 @@ public class ItemServiceTest {
         Item itemEntity = new Item();
         itemEntity.setId(1L);
         when(itemRepository.save(any())).thenReturn(Mono.just(itemEntity));
+        when(cacheService.evictItemsCache()).thenReturn(Mono.empty());
 
         when(imagesService.upload(anyString())).thenReturn(Mono.just(1L));
 
@@ -179,5 +183,7 @@ public class ItemServiceTest {
         Long itemId = itemService.createItem(item).block();
 
         assertNotNull(item);
+
+        verify(cacheService, times(1)).evictItemsCache();
     }
 }

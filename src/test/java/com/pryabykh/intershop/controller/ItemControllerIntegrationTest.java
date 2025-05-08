@@ -10,14 +10,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 public class ItemControllerIntegrationTest extends WebFluxPostgreSQLTestContainerBaseTest {
 
     @Autowired
+    @MockitoSpyBean
     private ItemRepository itemRepository;
 
     @Autowired
@@ -72,6 +79,15 @@ public class ItemControllerIntegrationTest extends WebFluxPostgreSQLTestContaine
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/html")
                 .expectBody();
+
+        webTestClient.get()
+                .uri("/main/items")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/html")
+                .expectBody();
+
+        verify(itemRepository, times(1)).findAllOrderByIdDesc(anyLong(), anyInt(), anyInt());
     }
 
     @Test
@@ -94,6 +110,15 @@ public class ItemControllerIntegrationTest extends WebFluxPostgreSQLTestContaine
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/html")
                 .expectBody();
+
+        webTestClient.get()
+                .uri("/items/" + savedItem.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/html")
+                .expectBody();
+
+        verify(itemRepository, times(1)).findItemById(anyLong(), anyLong());
     }
 
     @Test

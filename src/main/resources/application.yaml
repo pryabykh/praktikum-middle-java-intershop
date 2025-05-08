@@ -1,6 +1,8 @@
 db:
   schema-name: intershop
 spring:
+  codec:
+    max-in-memory-size: 10MB
   data:
     redis:
       host: 127.0.0.1

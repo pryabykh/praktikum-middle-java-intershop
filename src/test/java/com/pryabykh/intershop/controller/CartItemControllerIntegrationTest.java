@@ -8,18 +8,25 @@ import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ImageRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
 import com.pryabykh.intershop.repository.UserRepository;
+import com.pryabykh.intershop.service.CacheService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestContainerBaseTest {
 
     @Autowired
+    @MockitoSpyBean
     private CartItemRepository cartItemRepository;
 
     @Autowired
@@ -33,6 +40,10 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
 
     @Autowired
     private DatabaseClient databaseClient;
+
+    @Autowired
+    @MockitoSpyBean
+    private CacheService cacheService;
 
     @AfterEach
     void tearDown() {
@@ -76,6 +87,8 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().value("Location", Matchers.equalTo("/main/items"));
+
+        verify(cacheService, times(1)).evictCaches(anyLong(), anyLong());
     }
 
     @Test
@@ -106,6 +119,8 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().value("Location", Matchers.equalTo("/items/" + savedItem.getId()));
+
+        verify(cacheService, times(1)).evictCaches(anyLong(), anyLong());
     }
 
     @Test
@@ -136,6 +151,8 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().value("Location", Matchers.equalTo("/cart/items"));
+
+        verify(cacheService, times(1)).evictCaches(anyLong(), anyLong());
     }
 
     @Test
@@ -168,5 +185,14 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/html")
                 .expectBody();
+
+        webTestClient.get()
+                .uri("/cart/items")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/html")
+                .expectBody();
+
+        verify(cartItemRepository, times(1)).findByUserIdOrderByIdDesc(anyLong());
     }
 }

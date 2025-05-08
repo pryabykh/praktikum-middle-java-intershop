@@ -9,9 +9,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ImageControllerIntegrationTest extends WebFluxPostgreSQLTestContainerBaseTest {
 
@@ -22,6 +27,7 @@ public class ImageControllerIntegrationTest extends WebFluxPostgreSQLTestContain
     private ItemRepository itemRepository;
 
     @Autowired
+    @MockitoSpyBean
     private ImageRepository imageRepository;
 
     @Autowired
@@ -42,7 +48,7 @@ public class ImageControllerIntegrationTest extends WebFluxPostgreSQLTestContain
     }
 
     @Test
-    void modifyCartAndRedirectToMain() throws Exception {
+    void fetchImage() throws Exception {
         Image image = new Image();
         image.setName("n");
         image.setBytes("b".getBytes(StandardCharsets.UTF_8));
@@ -52,5 +58,12 @@ public class ImageControllerIntegrationTest extends WebFluxPostgreSQLTestContain
                 .uri("/images/" + imageId)
                 .exchange()
                 .expectStatus().isOk();
+
+        webTestClient.get()
+                .uri("/images/" + imageId)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(imageRepository, times(1)).findById(anyLong());
     }
 }

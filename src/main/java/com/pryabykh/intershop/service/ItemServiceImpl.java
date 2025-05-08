@@ -19,13 +19,15 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final ImagesService imagesService;
     private final UserService userService;
+    private final CacheService cacheService;
 
     public ItemServiceImpl(ItemRepository itemRepository,
                            ImagesService imagesService,
-                           UserService userService) {
+                           UserService userService, CacheService cacheService) {
         this.itemRepository = itemRepository;
         this.imagesService = imagesService;
         this.userService = userService;
+        this.cacheService = cacheService;
     }
 
     @Override
@@ -107,7 +109,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public Mono<Long> createItem(CreateItemDto itemDto) {
-        return imagesService.upload(itemDto.getBase64Image())
+        return cacheService.evictItemsCache().then(imagesService.upload(itemDto.getBase64Image())
                 .map(imageId -> {
                     Item item = new Item();
                     item.setTitle(itemDto.getTitle());
@@ -117,6 +119,6 @@ public class ItemServiceImpl implements ItemService {
                     return item;
                 })
                 .flatMap(itemRepository::save)
-                .map(Item::getId);
+                .map(Item::getId));
     }
 }
