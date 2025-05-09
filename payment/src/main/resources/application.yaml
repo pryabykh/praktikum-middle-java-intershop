@@ -1,0 +1,22 @@
+server:
+  port: 8081
+db:
+  schema-name: payment
+spring:
+  codec:
+    max-in-memory-size: 10MB
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/myblog
+    username: user
+    password: pass
+  jackson:
+    time-zone: UTC
+  liquibase:
+    liquibase-schema: ${db.schema-name}
+    default-schema: ${db.schema-name}
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    url: jdbc:postgresql://localhost:5432/myblog
+    user: user
+    password: pass
+  application:
+    name: payment
