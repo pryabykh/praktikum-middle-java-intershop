@@ -1,11 +1,11 @@
-package com.pryabykh.payment.entity;
+package com.pryabykh.intershop.entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table(name = "payment.accounts")
-public class Account {
+@Table(name = "intershop.carts")
+public class CartItem {
 
     @Id
     private Long id;
@@ -13,13 +13,18 @@ public class Account {
     @Column("user_id")
     private Long userId;
 
-    @Column("balance")
-    private Long balance;
+    @Column("item_id")
+    private Long itemId;
 
-    public Account(Long id, Long userId, Long balance) {
-        this.id = id;
+    @Column("count")
+    private int count = 1;
+
+    public CartItem() {
+    }
+
+    public CartItem(Long userId, int count) {
         this.userId = userId;
-        this.balance = balance;
+        this.count = count;
     }
 
     public Long getId() {
@@ -38,11 +43,19 @@ public class Account {
         this.userId = userId;
     }
 
-    public Long getBalance() {
-        return balance;
+    public int getCount() {
+        return count;
     }
 
-    public void setBalance(Long balance) {
-        this.balance = balance;
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 }

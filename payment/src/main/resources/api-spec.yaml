@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  description: RESTful API for managing user balances and processing payments.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+
+tags:
+  - name: Balance
+    description: Endpoints related to checking user balance
+  - name: Payments
+    description: Endpoints related to making payments
+
+paths:
+  /balance:
+    get:
+      summary: Get user's current balance
+      tags:
+        - Balance
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Current balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    format: int64
+                  balance:
+                    type: integer
+                    format: int64
+                example:
+                  user_id: 123
+                  balance: 5000
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "User not found"
+        '500':
+          description: Internal server error
+
+  /pay:
+    post:
+      summary: Process a payment by deducting amount from user's balance
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  format: int64
+                amount:
+                  type: integer
+                  format: int64
+              example:
+                user_id: 123
+                amount: 2000
+      responses:
+        '200':
+          description: Payment successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  new_balance:
+                    type: integer
+                    format: int64
+                  success:
+                    type: boolean
+                example:
+                  message: "Payment successful"
+                  new_balance: 3000
+                  success: true
+        '400':
+          description: Insufficient funds or invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "Insufficient balance"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "User not found"
+        '500':
+          description: Internal server error
