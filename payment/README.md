@@ -1,4 +1,4 @@
-# praktikum-middle-java-intershop-v2
+# praktikum-middle-java-intershop-v3
 
 ## Java
 Приложение запускается на версии Java 21
@@ -25,13 +25,10 @@ mvn clean package
 Для запуска веб-приложения необходимо из дирректории проекта запустить следующие команды
 
 ```
-docker build --tag=intershop-app-pr:latest .
 docker-compose up -d
 ```
 
 Данные команды запустят приложение в Docker контейнере с БД внутри.
 
 ## Веб-интерфейс приложения
-После запуска приложения веб-интерфейс будет доступен по адресу http://localhost:8080
-
-Добавление товаров происходит в следующей форме: http://localhost:8080/create-item-form
+Посмотреть текущий баланс пользователя: http://localhost:8081/balance?user_id=1

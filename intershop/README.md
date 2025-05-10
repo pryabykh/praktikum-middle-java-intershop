@@ -1,10 +1,13 @@
-# praktikum-middle-java-intershop-v2
+# praktikum-middle-java-intershop-v3
 
 ## Java
 Приложение запускается на версии Java 21
 
 ## База данных
 Для работы необходима база данных **PostgreSQL 16.0**
+
+## Redis
+В качестве кэша в приложении используется Redis 7.4.2
 
 ## Maven
 При разработке приложения использовался Maven версии 3.9.9
@@ -25,7 +28,6 @@ mvn clean package
 Для запуска веб-приложения необходимо из дирректории проекта запустить следующие команды
 
 ```
-docker build --tag=intershop-app-pr:latest .
 docker-compose up -d
 ```
 

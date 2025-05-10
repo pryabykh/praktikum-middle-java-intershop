@@ -63,6 +63,7 @@ public class OrderServiceTest {
     @Test
     void createOrder_whenItemsExistInCart_ShouldCreateOrder() {
         when(cacheService.evictCaches(anyLong(), eq(null))).thenReturn(Mono.empty());
+        when(cacheService.evictAllCaches()).thenReturn(Mono.empty());
         when(paymentApiClient.payPost(any()))
                 .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));

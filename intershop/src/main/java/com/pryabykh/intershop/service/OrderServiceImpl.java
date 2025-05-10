@@ -49,7 +49,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Mono<Long> createOrder() {
-        return userService.fetchDefaultUserId()
+        Mono<Void> evictAllCachesMono = cacheService.evictAllCaches();
+        Mono<Long> orderIdMono = userService.fetchDefaultUserId()
                 .flatMapMany(cartItemRepository::findByUserIdOrderByIdDesc)
                 .collectList()
                 .flatMap(cartItems -> {
@@ -89,12 +90,10 @@ public class OrderServiceImpl implements OrderService {
                                                 .flatMap(savedOrder -> {
                                                     List<Mono<OrderItem>> savedOrderItemMonos = orderItems.stream()
                                                             .map(orderItem -> {
-                                                                Mono<OrderItem> orderItemMono = cacheService.evictCaches(order.getUserId(), null)
-                                                                        .flatMap(result -> {
-                                                                            orderItem.setOrderId(savedOrder.getId());
-                                                                            return orderItemRepository.save(orderItem);
-                                                                        });
-                                                                return orderItemMono;
+                                                                orderItem.setOrderId(savedOrder.getId());
+                                                                Mono<Void> evictCaches = cacheService.evictCaches(order.getUserId(), null);
+                                                                Mono<OrderItem> saveOrderItemMono = orderItemRepository.save(orderItem);
+                                                                return evictCaches.then(saveOrderItemMono);
                                                             })
                                                             .toList();
 
@@ -108,6 +107,7 @@ public class OrderServiceImpl implements OrderService {
                                 });
                             });
                 });
+        return evictAllCachesMono.then(orderIdMono);
     }
 
     @Override

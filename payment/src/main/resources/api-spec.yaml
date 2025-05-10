@@ -6,8 +6,6 @@ info:
 servers:
   - url: http://localhost:8081
     description: Local development server
-  - url: http://payment:8081
-    description: Docker server
 
 tags:
   - name: Balance

@@ -23,7 +23,7 @@ public class CacheServiceImpl implements CacheService {
             deleteItems = redisTemplate.delete("items::" + userId + "*");
         }
         Mono<Long> deleteCartItems = redisTemplate.delete("cartItems::" + userId);
-        return Mono.when(deleteItemsList, deleteItems, deleteCartItems);
+        return Mono.when(deleteItemsList, deleteItems, deleteCartItems).then();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class CacheServiceImpl implements CacheService {
         Flux<Long> deleteItemsList = redisTemplate.keys("itemsList::*").flatMap(redisTemplate::delete);
         Flux<Long> deleteItems = redisTemplate.keys("items::*").flatMap(redisTemplate::delete);
         Flux<Long> deleteCartItems = redisTemplate.keys("cartItems::*").flatMap(redisTemplate::delete);
-        return Mono.when(deleteItemsList, deleteItems, deleteCartItems);
+        return Mono.when(deleteItemsList, deleteItems, deleteCartItems).then();
     }
 
     @CacheEvict(

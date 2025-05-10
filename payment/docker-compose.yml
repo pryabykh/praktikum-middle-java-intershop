@@ -1,25 +1,25 @@
 version: '3.8'
 
 services:
-  intershop-app-pr:
-    image: 'intershop-app-pr:latest'
+  payment-pr:
+    image: 'payment-pr:latest'
     build:
       context: .
-    container_name: intershop-app-pr
+    container_name: payment-pr
     depends_on:
-      - db-intershop-pr
+      - db-payment-pr
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
-      - SPRING_R2DBC_URL=r2dbc:postgresql://db-intershop-pr:5432/intershop
+      - SPRING_R2DBC_URL=r2dbc:postgresql://db-payment-pr:5432/intershop
       - SPRING_R2DBC_USERNAME=someUser
       - SPRING_R2DBC_PASSWORD=d1ff1cultPasSw0rD
-      - SPRING_LIQUIBASE_URL=jdbc:postgresql://db-intershop-pr:5432/intershop
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://db-payment-pr:5432/intershop
       - SPRING_LIQUIBASE_USER=someUser
       - SPRING_LIQUIBASE_PASSWORD=d1ff1cultPasSw0rD
-  db-intershop-pr:
+  db-payment-pr:
     image: 'postgres:16-alpine'
-    container_name: db-intershop-pr
+    container_name: db-payment-pr
     environment:
       POSTGRES_USER: someUser
       POSTGRES_PASSWORD: d1ff1cultPasSw0rD
