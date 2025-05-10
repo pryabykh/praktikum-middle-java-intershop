@@ -16,8 +16,21 @@ public class CacheServiceImpl implements CacheService {
 
     public Mono<Void> evictCaches(Long userId, Long itemId) {
         Flux<Long> deleteItemsList = redisTemplate.keys("itemsList::" + userId + "*").flatMap(redisTemplate::delete);
-        Mono<Long> deleteItems = redisTemplate.delete("items::" + userId + "," + itemId);
+        Mono<Long> deleteItems;
+        if (itemId != null) {
+            deleteItems = redisTemplate.delete("items::" + userId + "," + itemId);
+        } else {
+            deleteItems = redisTemplate.delete("items::" + userId + "*");
+        }
         Mono<Long> deleteCartItems = redisTemplate.delete("cartItems::" + userId);
+        return Mono.when(deleteItemsList, deleteItems, deleteCartItems);
+    }
+
+    @Override
+    public Mono<Void> evictAllCaches() {
+        Flux<Long> deleteItemsList = redisTemplate.keys("itemsList::*").flatMap(redisTemplate::delete);
+        Flux<Long> deleteItems = redisTemplate.keys("items::*").flatMap(redisTemplate::delete);
+        Flux<Long> deleteCartItems = redisTemplate.keys("cartItems::*").flatMap(redisTemplate::delete);
         return Mono.when(deleteItemsList, deleteItems, deleteCartItems);
     }
 

@@ -46,6 +46,8 @@ public class CartItemController {
                         .modelAttribute("items", cartDto.getItems())
                         .modelAttribute("total", cartDto.getTotal())
                         .modelAttribute("empty", cartDto.isEmpty())
+                        .modelAttribute("possibleToBuy", cartDto.isPossibleToBuy())
+                        .modelAttribute("available", cartDto.isAvailable())
                         .build());
     }
 }

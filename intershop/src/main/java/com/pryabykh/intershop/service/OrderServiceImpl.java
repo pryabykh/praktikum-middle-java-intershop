@@ -1,5 +1,7 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.client.PaymentApiClient;
+import com.pryabykh.intershop.client.domain.PayPostRequest;
 import com.pryabykh.intershop.dto.OrderDto;
 import com.pryabykh.intershop.dto.OrderItemDto;
 import com.pryabykh.intershop.entity.CartItem;
@@ -25,17 +27,23 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserService userService;
+    private final PaymentApiClient paymentApiClient;
+    private final CacheService cacheService;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ItemRepository itemRepository,
                             CartItemRepository cartItemRepository,
                             OrderItemRepository orderItemRepository,
-                            UserService userService) {
+                            UserService userService,
+                            PaymentApiClient paymentApiClient,
+                            CacheService cacheService) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
         this.cartItemRepository = cartItemRepository;
         this.orderItemRepository = orderItemRepository;
         this.userService = userService;
+        this.paymentApiClient = paymentApiClient;
+        this.cacheService = cacheService;
     }
 
     @Override
@@ -74,19 +82,30 @@ public class OrderServiceImpl implements OrderService {
                                 order.setUserId(cartItems.isEmpty() ? null : cartItems.get(0).getUserId());
                                 order.setTotalSum(totalSum.get());
 
-                                return orderRepository.save(order)
-                                        .flatMap(savedOrder -> {
-                                            List<Mono<OrderItem>> savedOrderItemMonos = orderItems.stream()
-                                                    .map(orderItem -> {
-                                                        orderItem.setOrderId(savedOrder.getId());
-                                                        return orderItemRepository.save(orderItem);
-                                                    })
-                                                    .toList();
+                                PayPostRequest payRequest = new PayPostRequest().amount(totalSum.get()).userId(order.getUserId());
+                                return paymentApiClient.payPost(payRequest).flatMap(payResponse -> {
+                                    if (payResponse.getSuccess()) {
+                                        return orderRepository.save(order)
+                                                .flatMap(savedOrder -> {
+                                                    List<Mono<OrderItem>> savedOrderItemMonos = orderItems.stream()
+                                                            .map(orderItem -> {
+                                                                Mono<OrderItem> orderItemMono = cacheService.evictCaches(order.getUserId(), null)
+                                                                        .flatMap(result -> {
+                                                                            orderItem.setOrderId(savedOrder.getId());
+                                                                            return orderItemRepository.save(orderItem);
+                                                                        });
+                                                                return orderItemMono;
+                                                            })
+                                                            .toList();
 
-                                            return Flux.concat(savedOrderItemMonos)
-                                                    .then(cartItemRepository.deleteByUserId(savedOrder.getUserId()))
-                                                    .thenReturn(savedOrder.getId());
-                                        });
+                                                    return Flux.concat(savedOrderItemMonos)
+                                                            .then(cartItemRepository.deleteByUserId(savedOrder.getUserId()))
+                                                            .thenReturn(savedOrder.getId());
+                                                });
+                                    } else {
+                                        return Mono.error(new IllegalAccessError());
+                                    }
+                                });
                             });
                 });
     }

@@ -6,5 +6,7 @@ public interface CacheService {
 
     Mono<Void> evictCaches(Long userId, Long itemId);
 
+    Mono<Void> evictAllCaches();
+
     Mono<Void> evictItemsCache();
 }

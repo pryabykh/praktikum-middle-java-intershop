@@ -122,9 +122,11 @@
 						<configuration>
 							<inputSpec>${project.basedir}/src/main/resources/api-spec.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>com.pryabykh.controller.payment.api</apiPackage>
-							<invokerPackage>com.pryabykh.controller</invokerPackage>
-							<modelPackage>com.pryabykh.controller.domain</modelPackage>
+							<apiPackage>com.pryabykh.payment.api</apiPackage>
+							<invokerPackage>com.pryabykh.payment</invokerPackage>
+							<modelPackage>com.pryabykh.payment.domain</modelPackage>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
 							<configOptions>
 								<hideGenerationTimestamp>true</hideGenerationTimestamp>
 								<requestMappingMode>controller</requestMappingMode>

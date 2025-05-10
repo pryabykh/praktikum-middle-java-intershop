@@ -5,8 +5,10 @@ import com.pryabykh.intershop.entity.Item;
 import com.pryabykh.intershop.entity.User;
 import com.pryabykh.intershop.repository.ImageRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
+import com.pryabykh.intershop.service.CacheService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -32,6 +34,14 @@ public class ItemControllerIntegrationTest extends WebFluxPostgreSQLTestContaine
 
     @Autowired
     private DatabaseClient databaseClient;
+
+    @Autowired
+    private CacheService cacheService;
+
+    @BeforeEach
+    void setUp() {
+        cacheService.evictAllCaches().block();
+    }
 
     @AfterEach
     void tearDown() {

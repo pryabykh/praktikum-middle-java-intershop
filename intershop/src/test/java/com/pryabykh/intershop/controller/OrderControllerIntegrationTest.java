@@ -1,5 +1,8 @@
 package com.pryabykh.intershop.controller;
 
+import com.pryabykh.intershop.client.PaymentApiClient;
+import com.pryabykh.intershop.client.domain.PayPost200Response;
+import com.pryabykh.intershop.client.domain.PayPostRequest;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Image;
 import com.pryabykh.intershop.entity.Item;
@@ -8,15 +11,22 @@ import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ImageRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
 import com.pryabykh.intershop.repository.OrderRepository;
+import com.pryabykh.intershop.service.CacheService;
 import com.pryabykh.intershop.service.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContainerBaseTest {
 
@@ -38,6 +48,18 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
     @Autowired
     private DatabaseClient databaseClient;
 
+    @MockitoBean
+    private PaymentApiClient paymentApiClient;
+
+    @Autowired
+    private CacheService cacheService;
+
+    @BeforeEach
+    void setUp() {
+        cacheService.evictAllCaches().block();
+        Mockito.reset(paymentApiClient);
+    }
+
     @AfterEach
     void tearDown() {
         Mono<Void> cleanup = databaseClient.sql("DELETE FROM intershop.carts;")
@@ -54,6 +76,8 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
 
     @Test
     void createOrder() throws Exception {
+        when(paymentApiClient.payPost(any()))
+                .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         Image image = new Image();
         image.setName("n");
         image.setBytes("b".getBytes(StandardCharsets.UTF_8));
@@ -70,6 +94,7 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
         cartItem.setItemId(savedItem.getId());
         cartItem.setCount(1);
         cartItem.setUserId(userService.fetchDefaultUserId().block());
+
         cartItemRepository.save(cartItem).block();
 
         List<CartItem> block = cartItemRepository.findAll().collectList().block();
@@ -82,6 +107,8 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
 
     @Test
     void fetchOrder() throws Exception {
+        when(paymentApiClient.payPost(any()))
+                .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         Image image = new Image();
         image.setName("n");
         image.setBytes("b".getBytes(StandardCharsets.UTF_8));
@@ -116,6 +143,8 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
 
     @Test
     void fetchOrders() throws Exception {
+        when(paymentApiClient.payPost(any()))
+                .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         Image image = new Image();
         image.setName("n");
         image.setBytes("b".getBytes(StandardCharsets.UTF_8));

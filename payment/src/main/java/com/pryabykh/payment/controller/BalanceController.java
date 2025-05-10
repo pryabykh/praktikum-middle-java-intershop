@@ -1,7 +1,7 @@
 package com.pryabykh.payment.controller;
 
-import com.pryabykh.controller.domain.BalanceGet200Response;
-import com.pryabykh.controller.payment.api.BalanceApi;
+import com.pryabykh.payment.api.BalanceApi;
+import com.pryabykh.payment.domain.BalanceGet200Response;
 import com.pryabykh.payment.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

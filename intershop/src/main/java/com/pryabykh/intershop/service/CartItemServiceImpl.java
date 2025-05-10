@@ -1,6 +1,8 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.client.BalanceApiClient;
 import com.pryabykh.intershop.constant.CartActions;
+import com.pryabykh.intershop.dto.BalanceDto;
 import com.pryabykh.intershop.dto.CartDto;
 import com.pryabykh.intershop.dto.ItemDto;
 import com.pryabykh.intershop.entity.CartItem;
@@ -10,20 +12,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Service
 public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
     private final ItemRepository itemRepository;
-
+    private final BalanceApiClient balanceApi;
     private final UserService userService;
     private final CacheService cacheService;
 
     public CartItemServiceImpl(CartItemRepository cartItemRepository,
                                ItemRepository itemRepository,
+                               BalanceApiClient balanceApi,
                                UserService userService,
                                CacheService cacheService) {
         this.cartItemRepository = cartItemRepository;
         this.itemRepository = itemRepository;
+        this.balanceApi = balanceApi;
         this.userService = userService;
         this.cacheService = cacheService;
     }
@@ -69,26 +75,36 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     @Transactional(readOnly = true)
     public Mono<CartDto> fetchCartItems() {
-        return userService.fetchDefaultUserId()
-                .flatMapMany(cartItemRepository::findByUserIdOrderByIdDesc)
-                .flatMap(cartItem -> itemRepository.findById(cartItem.getItemId())
-                        .map(item -> {
-                            long itemPrice = item.getPrice() * cartItem.getCount() / 100;
-                            return new ItemDto(
-                                    item.getId(),
-                                    item.getTitle(),
-                                    String.valueOf(itemPrice),
-                                    item.getDescription(),
-                                    String.valueOf(item.getImageId()),
-                                    cartItem.getCount()
-                            );
-                        }))
-                .collectList()
-                .map(itemDtos -> {
-                    long total = itemDtos.stream()
-                            .mapToLong(dto -> Long.parseLong(dto.getPrice()))
-                            .sum();
-                    return new CartDto(itemDtos, total, itemDtos.isEmpty());
-                });
+        return userService.fetchDefaultUserId().flatMap(userId -> {
+            Mono<BalanceDto> balanceMono = balanceApi.balanceGet(userId)
+                    .map(balanceResponse -> new BalanceDto(balanceResponse.getBalance(), true))
+                    .onErrorResume(e -> Mono.just(new BalanceDto(null, false)));
+
+            Mono<List<ItemDto>> monoItemsDto = cartItemRepository.findByUserIdOrderByIdDesc(userId)
+                    .flatMap(cartItem -> itemRepository.findById(cartItem.getItemId())
+                            .map(item -> {
+                                long itemPrice = item.getPrice() * cartItem.getCount() / 100;
+                                return new ItemDto(
+                                        item.getId(),
+                                        item.getTitle(),
+                                        String.valueOf(itemPrice),
+                                        item.getDescription(),
+                                        String.valueOf(item.getImageId()),
+                                        cartItem.getCount()
+                                );
+                            })).collectList();
+
+            return Mono.zip(balanceMono, monoItemsDto, (balance, itemDtos) -> {
+                long total = itemDtos.stream()
+                        .mapToLong(dto -> Long.parseLong(dto.getPrice()))
+                        .sum();
+                if (balance.isAvailable()) {
+                    boolean possibleToBuy = (balance.getBalance() / 100 - total) >= 0;
+                    return new CartDto(itemDtos, total, itemDtos.isEmpty(), possibleToBuy, true);
+                } else {
+                    return new CartDto(itemDtos, total, itemDtos.isEmpty(), false, false);
+                }
+            });
+        });
     }
 }

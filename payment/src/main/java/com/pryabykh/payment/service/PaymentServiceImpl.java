@@ -1,7 +1,7 @@
 package com.pryabykh.payment.service;
 
-import com.pryabykh.controller.domain.BalanceGet200Response;
-import com.pryabykh.controller.domain.PayPost200Response;
+import com.pryabykh.payment.domain.BalanceGet200Response;
+import com.pryabykh.payment.domain.PayPost200Response;
 import com.pryabykh.payment.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

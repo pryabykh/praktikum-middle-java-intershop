@@ -1,5 +1,7 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.client.PaymentApiClient;
+import com.pryabykh.intershop.client.domain.PayPost200Response;
 import com.pryabykh.intershop.dto.OrderDto;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Item;
@@ -21,6 +23,7 @@ import reactor.core.publisher.Mono;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,13 +49,22 @@ public class OrderServiceTest {
     @MockitoBean
     private OrderItemRepository orderItemRepository;
 
+    @MockitoBean
+    private PaymentApiClient paymentApiClient;
+
+    @MockitoBean
+    private CacheService cacheService;
+
     @BeforeEach
     void setUp() {
-        Mockito.reset(userService, cartItemRepository, orderRepository, itemRepository, orderItemRepository);
+        Mockito.reset(userService, cartItemRepository, orderRepository, itemRepository, orderItemRepository, cacheService);
     }
 
     @Test
     void createOrder_whenItemsExistInCart_ShouldCreateOrder() {
+        when(cacheService.evictCaches(anyLong(), eq(null))).thenReturn(Mono.empty());
+        when(paymentApiClient.payPost(any()))
+                .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
         when(cartItemRepository.deleteByUserId(eq(1L))).thenReturn(Mono.empty().then());
         Item item = new Item();
@@ -88,6 +100,8 @@ public class OrderServiceTest {
 
     @Test
     void findById_whenEntityExists_shouldReturnIt() {
+        when(paymentApiClient.payPost(any()))
+                .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         Order order = new Order();
         order.setId(1L);
         order.setUserId(1L);
@@ -119,6 +133,8 @@ public class OrderServiceTest {
 
     @Test
     void findAll_whenEntityExists_shouldReturnIt() {
+        when(paymentApiClient.payPost(any()))
+                .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
         Order order = new Order();
         order.setId(1L);

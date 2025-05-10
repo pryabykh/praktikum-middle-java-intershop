@@ -10,10 +10,22 @@ public class CartDto {
 
     private boolean empty;
 
+    private boolean possibleToBuy;
+
+    private boolean available;
+
     public CartDto(List<ItemDto> items, long total, boolean empty) {
         this.items = items;
         this.total = total;
         this.empty = empty;
+    }
+
+    public CartDto(List<ItemDto> items, long total, boolean empty, boolean possibleToBuy, boolean available) {
+        this.items = items;
+        this.total = total;
+        this.empty = empty;
+        this.possibleToBuy = possibleToBuy;
+        this.available = available;
     }
 
     public List<ItemDto> getItems() {
@@ -38,5 +50,21 @@ public class CartDto {
 
     public void setEmpty(boolean empty) {
         this.empty = empty;
+    }
+
+    public boolean isPossibleToBuy() {
+        return possibleToBuy;
+    }
+
+    public void setPossibleToBuy(boolean possibleToBuy) {
+        this.possibleToBuy = possibleToBuy;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 }

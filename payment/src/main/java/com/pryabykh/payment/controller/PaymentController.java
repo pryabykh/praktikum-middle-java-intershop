@@ -1,8 +1,8 @@
 package com.pryabykh.payment.controller;
 
-import com.pryabykh.controller.domain.PayPost200Response;
-import com.pryabykh.controller.domain.PayPostRequest;
-import com.pryabykh.controller.payment.api.PaymentsApi;
+import com.pryabykh.payment.api.PaymentsApi;
+import com.pryabykh.payment.domain.PayPost200Response;
+import com.pryabykh.payment.domain.PayPostRequest;
 import com.pryabykh.payment.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

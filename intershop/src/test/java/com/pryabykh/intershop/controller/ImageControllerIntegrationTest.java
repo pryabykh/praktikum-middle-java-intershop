@@ -5,8 +5,11 @@ import com.pryabykh.intershop.repository.CartItemRepository;
 import com.pryabykh.intershop.repository.ImageRepository;
 import com.pryabykh.intershop.repository.ItemRepository;
 import com.pryabykh.intershop.repository.UserRepository;
+import com.pryabykh.intershop.service.CacheService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -35,6 +38,14 @@ public class ImageControllerIntegrationTest extends WebFluxPostgreSQLTestContain
 
     @Autowired
     protected DatabaseClient databaseClient;
+
+    @Autowired
+    private CacheService cacheService;
+
+    @BeforeEach
+    void setUp() {
+        cacheService.evictAllCaches().block();
+    }
 
     @AfterEach
     void tearDown() {

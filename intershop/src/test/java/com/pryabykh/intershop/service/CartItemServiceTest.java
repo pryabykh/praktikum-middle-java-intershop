@@ -1,5 +1,7 @@
 package com.pryabykh.intershop.service;
 
+import com.pryabykh.intershop.client.BalanceApiClient;
+import com.pryabykh.intershop.client.domain.BalanceGet200Response;
 import com.pryabykh.intershop.constant.CartActions;
 import com.pryabykh.intershop.dto.CartDto;
 import com.pryabykh.intershop.entity.CartItem;
@@ -45,12 +47,15 @@ public class CartItemServiceTest {
     @MockitoBean
     private CacheService cacheService;
 
+    @MockitoBean
+    private BalanceApiClient balanceApiClient;
+
     @Captor
     private ArgumentCaptor<CartItem> cartItemArgumentCaptor;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(userService, cartItemRepository, itemRepository);
+        Mockito.reset(userService, cartItemRepository, itemRepository, balanceApiClient);
     }
 
     @Test
@@ -107,6 +112,8 @@ public class CartItemServiceTest {
 
     @Test
     void fetchCartItems_whenCartIsNotEmpty_shouldReturnItems() {
+        when(balanceApiClient.balanceGet(anyLong())).thenReturn(Mono.just(new BalanceGet200Response().balance(100L).userId(1L)));
+
         when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
 
         Item item = new Item();
