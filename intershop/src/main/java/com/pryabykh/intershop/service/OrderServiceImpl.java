@@ -50,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Mono<Long> createOrder() {
         Mono<Void> evictAllCachesMono = cacheService.evictAllCaches();
-        Mono<Long> orderIdMono = userService.fetchDefaultUserId()
+        Mono<Long> orderIdMono = userService.fetchCurrentUserId()
                 .flatMapMany(cartItemRepository::findByUserIdOrderByIdDesc)
                 .collectList()
                 .flatMap(cartItems -> {
@@ -121,7 +121,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public Flux<OrderDto> findAll() {
-        return userService.fetchDefaultUserId()
+        return userService.fetchCurrentUserId()
                 .flatMapMany(orderRepository::findByUserIdOrderByIdDesc)
                 .flatMap(this::mapOrder);
     }

@@ -2,7 +2,6 @@ package com.pryabykh.intershop.controller;
 
 import com.pryabykh.intershop.client.PaymentApiClient;
 import com.pryabykh.intershop.client.domain.PayPost200Response;
-import com.pryabykh.intershop.client.domain.PayPostRequest;
 import com.pryabykh.intershop.entity.CartItem;
 import com.pryabykh.intershop.entity.Image;
 import com.pryabykh.intershop.entity.Item;
@@ -93,7 +92,7 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
         CartItem cartItem = new CartItem();
         cartItem.setItemId(savedItem.getId());
         cartItem.setCount(1);
-        cartItem.setUserId(userService.fetchDefaultUserId().block());
+        cartItem.setUserId(userService.fetchCurrentUserId().block());
 
         cartItemRepository.save(cartItem).block();
 
@@ -124,7 +123,7 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
         CartItem cartItem = new CartItem();
         cartItem.setItemId(savedItem.getId());
         cartItem.setCount(1);
-        cartItem.setUserId(userService.fetchDefaultUserId().block());
+        cartItem.setUserId(userService.fetchCurrentUserId().block());
         cartItemRepository.save(cartItem).block();
 
         webTestClient.post()
@@ -160,7 +159,7 @@ public class OrderControllerIntegrationTest extends WebFluxPostgreSQLTestContain
         CartItem cartItem = new CartItem();
         cartItem.setItemId(savedItem.getId());
         cartItem.setCount(1);
-        cartItem.setUserId(userService.fetchDefaultUserId().block());
+        cartItem.setUserId(userService.fetchCurrentUserId().block());
         cartItemRepository.save(cartItem).block();
 
         webTestClient.post()

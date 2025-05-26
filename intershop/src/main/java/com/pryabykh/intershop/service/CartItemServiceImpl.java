@@ -37,7 +37,7 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     @Transactional
     public Mono<Void> modifyCart(Long itemId, String cartAction) {
-        return userService.fetchDefaultUserId()
+        return userService.fetchCurrentUserId()
                 .flatMap(userId -> cacheService.evictCaches(userId, itemId).then(Mono.just(userId)))
                 .flatMap(userId -> cartItemRepository.findByItemIdAndUserId(itemId, userId)
                         .flatMap(cartItem -> {
@@ -75,7 +75,7 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     @Transactional(readOnly = true)
     public Mono<CartDto> fetchCartItems() {
-        return userService.fetchDefaultUserId().flatMap(userId -> {
+        return userService.fetchCurrentUserId().flatMap(userId -> {
             Mono<BalanceDto> balanceMono = balanceApi.balanceGet(userId)
                     .map(balanceResponse -> new BalanceDto(balanceResponse.getBalance(), true))
                     .onErrorResume(e -> Mono.just(new BalanceDto(null, false)));

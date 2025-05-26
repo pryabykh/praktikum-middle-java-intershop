@@ -38,30 +38,30 @@ public class ItemServiceImpl implements ItemService {
         Flux<ItemDto> itemsFlux = Optional.ofNullable(name)
                 .map(n -> {
                     if (SortType.ALPHA.equals(sortType)) {
-                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                        return userService.fetchCurrentUserId().flatMapMany(userId -> {
                             return itemRepository.findAllByNameLikeOrderByTitleAsc(userId, n, pageSize, offset);
                         });
                     } else if (SortType.PRICE.equals(sortType)) {
-                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                        return userService.fetchCurrentUserId().flatMapMany(userId -> {
                             return itemRepository.findAllByNameLikeOrderByPriceAsc(userId, n, pageSize, offset);
                         });
                     } else {
-                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                        return userService.fetchCurrentUserId().flatMapMany(userId -> {
                             return itemRepository.findAllByNameLikeOrderByIdDesc(userId, n, pageSize, offset);
                         });
                     }
                 })
                 .orElseGet(() -> {
                     if (SortType.ALPHA.equals(sortType)) {
-                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                        return userService.fetchCurrentUserId().flatMapMany(userId -> {
                             return itemRepository.findAllOrderByTitleAsc(userId, pageSize, offset);
                         });
                     } else if (SortType.PRICE.equals(sortType)) {
-                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                        return userService.fetchCurrentUserId().flatMapMany(userId -> {
                             return itemRepository.findAllOrderByPriceAsc(userId, pageSize, offset);
                         });
                     } else {
-                        return userService.fetchDefaultUserId().flatMapMany(userId -> {
+                        return userService.fetchCurrentUserId().flatMapMany(userId -> {
                             return itemRepository.findAllOrderByIdDesc(userId, pageSize, offset);
                         });
                     }
@@ -91,7 +91,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public Mono<ItemDto> findById(Long id) {
-        return userService.fetchDefaultUserId().flatMap(userId -> {
+        return userService.fetchCurrentUserId().flatMap(userId -> {
             return itemRepository.findItemById(userId, id).map(item -> {
                 ItemDto itemDto = new ItemDto(
                         item.getId(),

@@ -67,7 +67,7 @@ public class ItemServiceTest {
                 .thenReturn(Mono.just(1L));
         when(itemRepository.count())
                 .thenReturn(Mono.just(1L));
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
 
         ItemsPage block = itemService.findAll(null, SortType.NO, 10, 0).block();
         assertNotNull(block);
@@ -84,7 +84,7 @@ public class ItemServiceTest {
 
         PageRequest pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id")));
 
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(itemRepository.findAllByNameLikeOrderByIdDesc(eq(1L), eq("name1"), eq(10), eq(0)))
                 .thenReturn(Flux.just(item));
         when(itemRepository.countByNameLike(eq("name1")))
@@ -105,7 +105,7 @@ public class ItemServiceTest {
 
         PageRequest pageable = PageRequest.of(0, 10, Sort.by("price"));
 
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(itemRepository.findAllByNameLikeOrderByPriceAsc(eq(1L), eq("name1"), eq(10), eq(0)))
                 .thenReturn(Flux.just(item));
         when(itemRepository.countByNameLike(eq("name1")))
@@ -126,7 +126,7 @@ public class ItemServiceTest {
 
         PageRequest pageable = PageRequest.of(0, 10, Sort.by("title"));
 
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(itemRepository.findAllByNameLikeOrderByTitleAsc(eq(1L), eq("name1"), eq(10), eq(0)))
                 .thenReturn(Flux.just(item));
         when(itemRepository.countByNameLike(eq("name1")))
@@ -145,7 +145,7 @@ public class ItemServiceTest {
         item.setTitle("title");
         item.setDescription("description");
 
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(itemRepository.findItemById(eq(1L), eq(1L)))
                 .thenReturn(Mono.just(item));
 

@@ -7,10 +7,16 @@
 </head>
 
 <body>
-    <a href="/orders" style="float:right;">
+<a th:if="${role == 'ROLE_GUEST'}" href="/login" style="float:right;">
+    <b>Вход&cudarrr;</b>
+</a>
+<a th:if="${role != 'ROLE_GUEST'}" href="/logout" style="float:right;">
+    <b>Выход&cudarrr;</b>
+</a>
+    <a th:if="${role != 'ROLE_GUEST'}" href="/orders" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
-    <a href="/cart/items" style="float:right;">
+    <a th:if="${role != 'ROLE_GUEST'}" href="/cart/items" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
     <a href="/main/items" style="float:right;">
@@ -27,10 +33,10 @@
         <p>
             <span th:text="${item.getDescription()}"></span>
         </p>
-        <a th:href="@{/modify/items/} + ${item.getId()} + '?action=plus'" style="font-size: 40px; color: darkgreen; text-decoration: none">+</a>
-        <a th:href="@{/modify/items/} + ${item.getId()} + '?action=minus'" style="font-size: 40px; color: red; text-decoration: none">-</a>
-        <a th:if="${item.getCount()==0}" th:href="@{/modify/items/} + ${item.getId()} + '?action=plus'" style="font-size: 20px; color: darkgreen; text-decoration: none">В корзину</a>
-        <span th:text="${item.getCount()}"></span>
+        <a th:if="${role != 'ROLE_GUEST'}" th:href="@{/modify/items/} + ${item.getId()} + '?action=plus'" style="font-size: 40px; color: darkgreen; text-decoration: none">+</a>
+        <a th:if="${role != 'ROLE_GUEST'}" th:href="@{/modify/items/} + ${item.getId()} + '?action=minus'" style="font-size: 40px; color: red; text-decoration: none">-</a>
+        <a th:if="${item.getCount()==0 && role != 'ROLE_GUEST'}" th:href="@{/modify/items/} + ${item.getId()} + '?action=plus'" style="font-size: 20px; color: darkgreen; text-decoration: none">В корзину</a>
+        <span th:if="${role != 'ROLE_GUEST'}" th:text="${item.getCount()}"></span>
     </div>
 </body>
 

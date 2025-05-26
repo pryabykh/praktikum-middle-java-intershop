@@ -7,13 +7,19 @@
 </head>
 
 <body>
-<a href="/create-item-form" style="float:right;">
+<a th:if="${role == 'ROLE_GUEST'}" href="/login" style="float:right;">
+    <b>Вход&cudarrr;</b>
+</a>
+<a th:if="${role != 'ROLE_GUEST'}" href="/logout" style="float:right;">
+    <b>Выход&cudarrr;</b>
+</a>
+<a th:if="${role == 'ROLE_ADMIN'}" href="/create-item-form" style="float:right;">
     <b>Добавить товар &cudarrr;</b>
 </a>
-    <a href="/orders" style="float:right;">
+    <a th:if="${role != 'ROLE_GUEST'}" href="/orders" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
-    <a href="/cart/items" style="float:right;">
+    <a th:if="${role != 'ROLE_GUEST'}" href="/cart/items" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
     <table style="width:70%;margin-left:auto;margin-right:auto;">
@@ -72,7 +78,7 @@
                     <tr>
                         <td th:text="${item.getDescription()}"></td>
                     </tr>
-                    <tr>
+                    <tr th:if="${role != 'ROLE_GUEST'}">
                         <td>
                             <a th:href="@{/modify/main/items/} + ${item.getId()} + '?action=plus'" style="font-size: 40px; color: darkgreen; text-decoration: none">+</a>
                             <a th:href="@{/modify/main/items/} + ${item.getId()} + '?action=minus'" style="font-size: 40px; color: red; text-decoration: none">-</a>

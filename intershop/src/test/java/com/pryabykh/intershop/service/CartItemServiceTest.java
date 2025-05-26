@@ -60,7 +60,7 @@ public class CartItemServiceTest {
 
     @Test
     void modifyCart_whenPlus_cartCountShouldBeAdded() {
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(cacheService.evictCaches(anyLong(), anyLong())).thenReturn(Mono.empty());
         CartItem cartItem = new CartItem();
         cartItem.setUserId(1L);
@@ -78,7 +78,7 @@ public class CartItemServiceTest {
 
     @Test
     void modifyCart_whenMinus_cartCountShouldBeSubtracted() {
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(cacheService.evictCaches(anyLong(), anyLong())).thenReturn(Mono.empty());
         CartItem cartItem = new CartItem();
         cartItem.setUserId(1L);
@@ -96,7 +96,7 @@ public class CartItemServiceTest {
 
     @Test
     void modifyCart_whenDelete_cartItemShouldBeDeleted() {
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(cacheService.evictCaches(anyLong(), anyLong())).thenReturn(Mono.empty());
         CartItem cartItem = new CartItem();
         cartItem.setUserId(1L);
@@ -114,7 +114,7 @@ public class CartItemServiceTest {
     void fetchCartItems_whenCartIsNotEmpty_shouldReturnItems() {
         when(balanceApiClient.balanceGet(anyLong())).thenReturn(Mono.just(new BalanceGet200Response().balance(100L).userId(1L)));
 
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
 
         Item item = new Item();
         item.setId(1L);

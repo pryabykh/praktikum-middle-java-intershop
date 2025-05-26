@@ -4,6 +4,9 @@ import com.pryabykh.intershop.dto.CreateItemDto;
 import com.pryabykh.intershop.enums.SortType;
 import com.pryabykh.intershop.service.ItemService;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
+
+import static com.pryabykh.intershop.utils.SecurityUtils.fetchUserRole;
 
 @Controller
 @RequestMapping("/")
@@ -29,7 +34,8 @@ public class ItemController {
     }
 
     @GetMapping(value = "/main/items", produces = MediaType.TEXT_HTML_VALUE)
-    public Mono<Rendering> mainItems(@RequestParam(value = "search", required = false) String search,
+    public Mono<Rendering> mainItems(Authentication authentication,
+                                     @RequestParam(value = "search", required = false) String search,
                                      @RequestParam(value = "sort", defaultValue = "NO") SortType sort,
                                      @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                      @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber) {
@@ -39,14 +45,16 @@ public class ItemController {
                         .modelAttribute("items", itemsPage.getItems())
                         .modelAttribute("sort", sort.name())
                         .modelAttribute("search", search)
+                        .modelAttribute("role", fetchUserRole(authentication))
                         .build());
     }
 
     @GetMapping("/items/{id}")
-    public Mono<Rendering> fetchItem(@PathVariable("id") Long id) {
+    public Mono<Rendering> fetchItem(Authentication authentication, @PathVariable("id") Long id) {
         return itemService.findById(id)
                 .map(item -> Rendering.view("item")
                         .modelAttribute("item", item)
+                        .modelAttribute("role", fetchUserRole(authentication))
                         .build());
     }
 

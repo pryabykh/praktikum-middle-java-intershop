@@ -27,3 +27,5 @@ spring:
     password: pass
   application:
     name: intershop
+payment:
+  url: http://localhost:8081

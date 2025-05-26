@@ -1,6 +1,7 @@
 package com.pryabykh.intershop.controller;
 
 import com.pryabykh.intershop.service.OrderService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
+
+import static com.pryabykh.intershop.utils.SecurityUtils.fetchUserRole;
 
 @Controller
 @RequestMapping("/")
@@ -26,12 +29,14 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{id}")
-    public Mono<Rendering> fetchOrder(@PathVariable("id") Long id,
+    public Mono<Rendering> fetchOrder(Authentication authentication,
+                                      @PathVariable("id") Long id,
                                       @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder) {
         return orderService.findById(id)
                 .map(order -> Rendering.view("order")
                         .modelAttribute("newOrder", newOrder)
                         .modelAttribute("order", order)
+                        .modelAttribute("role", fetchUserRole(authentication))
                         .build());
     }
 

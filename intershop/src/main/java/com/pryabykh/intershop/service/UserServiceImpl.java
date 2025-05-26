@@ -2,7 +2,7 @@ package com.pryabykh.intershop.service;
 
 import com.pryabykh.intershop.entity.User;
 import com.pryabykh.intershop.repository.UserRepository;
-import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -17,10 +17,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Mono<Long> fetchDefaultUserId() {
-        return userRepository.findAll(Sort.by("id"))
-                .next()
-                .map(User::getId)
-                .switchIfEmpty(Mono.error(new RuntimeException()));
+    public Mono<Long> fetchCurrentUserId() {
+        return ReactiveSecurityContextHolder.getContext().flatMap(context -> {
+            return userRepository.findByName(context.getAuthentication().getName())
+                    .map(User::getId);
+        }).switchIfEmpty(Mono.just(0L));
     }
 }

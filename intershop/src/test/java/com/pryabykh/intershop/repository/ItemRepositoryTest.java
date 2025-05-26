@@ -80,7 +80,7 @@ public class ItemRepositoryTest extends SpringBootPostgreSQLTestContainerBaseTes
 
     @Test
     void findAllByNameLike_whenTableHasRowsWithFetchedName_shouldReturnRows() {
-        Flux<Item> itemsFlux = userService.fetchDefaultUserId().flatMapMany(userId -> {
+        Flux<Item> itemsFlux = userService.fetchCurrentUserId().flatMapMany(userId -> {
             return itemRepository.findAllByNameLikeOrderByIdDesc(userId, "iphone", 10, 0);
         });
 
@@ -96,7 +96,7 @@ public class ItemRepositoryTest extends SpringBootPostgreSQLTestContainerBaseTes
 
     @Test
     void findAllByNameLike_whenTableDoesNotHaveRowsWithFetchedName_shouldReturnEmptyResult() {
-        Flux<Item> itemsFlux = userService.fetchDefaultUserId().flatMapMany(userId -> {
+        Flux<Item> itemsFlux = userService.fetchCurrentUserId().flatMapMany(userId -> {
             return itemRepository.findAllByNameLikeOrderByIdDesc(userId, "nonexistent", 0, 10);
         });
 

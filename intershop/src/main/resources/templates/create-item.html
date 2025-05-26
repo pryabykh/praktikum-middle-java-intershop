@@ -39,6 +39,12 @@
 </script>
 <body>
 <div class="main-container">
+    <a th:if="${role == 'ROLE_GUEST'}" href="/login" style="float:right;">
+        <b>Вход&cudarrr;</b>
+    </a>
+    <a th:if="${role != 'ROLE_GUEST'}" href="/logout" style="float:right;">
+        <b>Выход&cudarrr;</b>
+    </a>
     <a th:href="@{/}">На главную</a>
     <div class="form-container" id="userForm">
         <h2>Добавить товар</h2>

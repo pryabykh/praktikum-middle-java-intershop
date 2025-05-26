@@ -66,7 +66,7 @@ public class OrderServiceTest {
         when(cacheService.evictAllCaches()).thenReturn(Mono.empty());
         when(paymentApiClient.payPost(any()))
                 .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         when(cartItemRepository.deleteByUserId(eq(1L))).thenReturn(Mono.empty().then());
         Item item = new Item();
         item.setId(1L);
@@ -136,7 +136,7 @@ public class OrderServiceTest {
     void findAll_whenEntityExists_shouldReturnIt() {
         when(paymentApiClient.payPost(any()))
                 .thenReturn(Mono.just(new PayPost200Response().newBalance(1L).message("success").success(true)));
-        when(userService.fetchDefaultUserId()).thenReturn(Mono.just(1L));
+        when(userService.fetchCurrentUserId()).thenReturn(Mono.just(1L));
         Order order = new Order();
         order.setId(1L);
         order.setUserId(1L);

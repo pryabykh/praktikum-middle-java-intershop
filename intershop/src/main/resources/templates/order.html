@@ -7,6 +7,12 @@
 </head>
 
 <body>
+<a th:if="${role == 'ROLE_GUEST'}" href="/login" style="float:right;">
+    <b>Вход&cudarrr;</b>
+</a>
+<a th:if="${role != 'ROLE_GUEST'}" href="/logout" style="float:right;">
+    <b>Выход&cudarrr;</b>
+</a>
 <a href="/orders" style="float:right;">
     <b>ЗАКАЗЫ &cudarrr;</b>
 </a>

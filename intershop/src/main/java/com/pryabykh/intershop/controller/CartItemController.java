@@ -1,6 +1,7 @@
 package com.pryabykh.intershop.controller;
 
 import com.pryabykh.intershop.service.CartItemService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
+
+import static com.pryabykh.intershop.utils.SecurityUtils.fetchUserRole;
 
 @Controller
 @RequestMapping("/")
@@ -40,7 +43,7 @@ public class CartItemController {
     }
 
     @GetMapping("/cart/items")
-    public Mono<Rendering> fetchCartItems() {
+    public Mono<Rendering> fetchCartItems(Authentication authentication) {
         return cartItemService.fetchCartItems()
                 .map(cartDto -> Rendering.view("cart")
                         .modelAttribute("items", cartDto.getItems())
@@ -48,6 +51,7 @@ public class CartItemController {
                         .modelAttribute("empty", cartDto.isEmpty())
                         .modelAttribute("possibleToBuy", cartDto.isPossibleToBuy())
                         .modelAttribute("available", cartDto.isAvailable())
+                        .modelAttribute("role", fetchUserRole(authentication))
                         .build());
     }
 }
