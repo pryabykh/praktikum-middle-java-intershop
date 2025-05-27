@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges ->
                         exchanges
                                 .pathMatchers("/create-item-form").hasRole("ADMIN")
+                                .pathMatchers("/create-item").hasRole("ADMIN")
                                 .pathMatchers("/cart/**").authenticated()
                                 .pathMatchers("/orders/**").authenticated()
                                 .pathMatchers("/main/items").permitAll()

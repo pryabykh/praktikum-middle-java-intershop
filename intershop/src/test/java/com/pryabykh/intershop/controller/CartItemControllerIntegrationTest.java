@@ -18,9 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
@@ -76,6 +76,16 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
     }
 
     @Test
+    void modifyCartMainRedirectToLoginIfUnauthorized() {
+        webTestClient.get()
+                .uri("/modify/main/items/" + 1L + "?action=plus")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
     void modifyCartAndRedirectToMain() {
         Image image = new Image();
         image.setName("n");
@@ -108,6 +118,16 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
     }
 
     @Test
+    void modifyCartItemRedirectToLoginIfUnauthorized() {
+        webTestClient.get()
+                .uri("/modify/items/" + 1L + "?action=plus")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
     void modifyCartAndRedirectToItem() {
         Image image = new Image();
         image.setName("n");
@@ -140,6 +160,16 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
     }
 
     @Test
+    void modifyCartRedirectToLoginIfUnauthorized() {
+        webTestClient.get()
+                .uri("/modify/cart/items/" + 1L + "?action=plus")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
     void modifyCartAndRedirectToCart() {
         Image image = new Image();
         image.setName("n");
@@ -172,6 +202,16 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
     }
 
     @Test
+    void fetchCartItemsRedirectToLoginIfUnauthorized() {
+        webTestClient.get()
+                .uri("/cart/items")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
     void fetchCartItems() {
         when(balanceApiClient.balanceGet(anyLong())).thenReturn(Mono.just(new BalanceGet200Response().balance(100L).userId(1L)));
         // Setup data
@@ -214,6 +254,16 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
     }
 
     @Test
+    void fetchCartItemsWorksIfPaymentsUnavailableRedirectToLoginIfUnauthorized() {
+        webTestClient.get()
+                .uri("/cart/items")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
     void fetchCartItemsWorksIfPaymentsUnavailable() {
         when(balanceApiClient.balanceGet(anyLong())).thenReturn(Mono.error(RuntimeException::new));
         // Setup data

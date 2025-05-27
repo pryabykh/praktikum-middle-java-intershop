@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
@@ -132,6 +133,25 @@ public class ItemControllerIntegrationTest extends WebFluxPostgreSQLTestContaine
     }
 
     @Test
+    void showCreateItemFormRedirectToLoginIfUnauthorized() {
+        webTestClient.get()
+                .uri("/create-item-form")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
+    void showCreateItemFormReturnsForbiddenIfHasWrongRole() {
+        webTestClient.get()
+                .uri("/create-item-form")
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    @WithMockUser(username = "ADMIN", roles = {"ADMIN"})
     void showCreateItemForm() throws Exception {
         webTestClient.get()
                 .uri("/create-item-form")
@@ -142,6 +162,33 @@ public class ItemControllerIntegrationTest extends WebFluxPostgreSQLTestContaine
     }
 
     @Test
+    void createItemRedirectToLoginIfUnauthorized() {
+        webTestClient.post()
+                .uri("/create-item")
+                .body(BodyInserters.fromFormData("title", "test")
+                        .with("description", "test")
+                        .with("priceRubles", "1111")
+                        .with("base64Image", "test"))
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", Matchers.equalTo("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "user1", roles = {"CUSTOMER"})
+    void createItemReturnsForbiddenIfHasWrongRole() {
+        webTestClient.post()
+                .uri("/create-item")
+                .body(BodyInserters.fromFormData("title", "test")
+                        .with("description", "test")
+                        .with("priceRubles", "1111")
+                        .with("base64Image", "test"))
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    @WithMockUser(username = "ADMIN", roles = {"ADMIN"})
     void createItem() throws Exception {
         webTestClient.post()
                 .uri("/create-item")
