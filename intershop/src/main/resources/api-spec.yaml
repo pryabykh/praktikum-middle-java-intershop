@@ -121,3 +121,11 @@ paths:
                   error: "User not found"
         '500':
           description: Internal server error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - bearerAuth: []

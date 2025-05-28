@@ -27,5 +27,19 @@ spring:
     password: pass
   application:
     name: intershop
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:9090/realms/master
+        registration:
+          intershop:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: intershop
+            client-secret: i0YkGbI2yfoE4W35SU1xKy8sWyZ7uZcI
+            scope: profile
+            clientAuthenticationMethod: client_secret_post # Способ передачи секрета
 payment:
   url: http://localhost:8081
