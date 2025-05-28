@@ -15,10 +15,14 @@ import java.util.Map;
 public class SecurityConfig {
 
     @Bean
-    SecurityWebFilterChain securityFilterChain(ServerHttpSecurity security) throws Exception {
-        return security
-                .authorizeExchange(requests -> requests
-                        .anyExchange().authenticated()
+    SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
+        return http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges ->
+                        exchanges
+                                .pathMatchers("/balance").authenticated()
+                                .pathMatchers("/pay").authenticated()
+                                .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(serverSpec -> serverSpec
                         .jwt(jwtSpec -> {
