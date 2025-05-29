@@ -58,7 +58,7 @@ public class CartItemControllerIntegrationTest extends WebFluxPostgreSQLTestCont
     @BeforeEach
     void setUp() {
         cacheService.evictAllCaches().block();
-        Mockito.reset(cartItemRepository, cacheService);
+        Mockito.reset(cartItemRepository, cacheService, balanceApiClient);
     }
 
     @AfterEach
