@@ -6,9 +6,11 @@ services:
     build:
       context: ./intershop
     container_name: intershop-app-pr
+    restart: on-failure:10
     depends_on:
       - db-intershop-pr
-      - redis-server
+      - redis-server-pr
+      - keycloak-pr
     ports:
       - "8080:8080"
     environment:
@@ -18,15 +20,18 @@ services:
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://db-intershop-pr:5432/intershop
       - SPRING_LIQUIBASE_USER=someUser
       - SPRING_LIQUIBASE_PASSWORD=d1ff1cultPasSw0rD
-      - SPRING_DATA_REDIS_HOST=redis-server
+      - SPRING_DATA_REDIS_HOST=redis-server-pr
       - PAYMENT_URL=http://payment-pr:8081
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI=http://keycloak-pr:8080/realms/intershop
   payment-pr:
     image: 'payment-pr:latest'
     build:
       context: ./payment
     container_name: payment-pr
+    restart: on-failure:10
     depends_on:
       - db-intershop-pr
+      - keycloak-pr
     ports:
       - "8081:8081"
     environment:
@@ -36,12 +41,24 @@ services:
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://db-intershop-pr:5432/intershop
       - SPRING_LIQUIBASE_USER=someUser
       - SPRING_LIQUIBASE_PASSWORD=d1ff1cultPasSw0rD
-  redis-server:
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak-pr:8080/realms/intershop
+  redis-server-pr:
     image: redis:7.4.2-bookworm
-    container_name: redis-server
+    container_name: redis-server-pr
     ports:
       - "6379:6379"
     command: ["redis-server"]
+  keycloak-pr:
+    image: quay.io/keycloak/keycloak:26.1.3
+    container_name: keycloak-pr
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./realm-config:/opt/keycloak/data/import
+    command: start-dev --import-realm
   db-intershop-pr:
     image: 'postgres:16-alpine'
     container_name: db-intershop-pr
